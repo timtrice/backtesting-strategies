@@ -3,4 +3,4 @@ chapter_name: "Chapter "
 output_dir: "book-output"
 before_chapter_script: ["./R/load.R", "./R/functions.R"]
 rmd_files: ["index.Rmd",
-    "moving-averages.Rmd"]
+    "Cl-SMA20-Crossover.Rmd"]
