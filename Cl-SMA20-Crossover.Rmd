@@ -80,23 +80,31 @@ p <- getPortfolio(Cl.SMA20.Crossover)
 
 ### Per Trade Stats
 
-```{r 2-1-per-trade-stats}
-pts <- data.frame()
-for(symbol in symbols) {
-    pts <- bind_rows(pts, perTradeStats(Cl.SMA20.Crossover, symbol) %>% 
-                         mutate(Symbol = symbol))
-}
+```{r 2-1-trade-stats, include = TRUE}
+knitr::kable(t(tradeStats(Cl.SMA20.Crossover))[-c(1:2),], 
+             caption = "Trade Stats per Symbol")
 ```
 
-```{r 2-1-trade-stats-symbol}
-knitr::kable(pts %>% 
-                 group_by(Symbol) %>% 
-                 summarise(Trades = n(), 
-                           AvgCost = mean(Max.Notional.Cost), 
-                           AvgPL = mean(Net.Trading.PL), 
-                           MinPL = min(Net.Trading.PL), 
-                           MaxPL = max(Net.Trading.PL)), 
-             caption = "Trade Stats per Symbol")
+### Maximum Adverse Excursion
+
+```{r 2-1-mae, include = TRUE, fig.caption = "Maximum Adverse Excursion by Symbol"}
+par(mfrow = c(2,2))
+for(symbol in symbols) {
+    chart.ME(Portfolio = Cl.SMA20.Crossover, Symbol = symbol, type = "MAE", 
+             scale = "percent")
+}
+par(mfrow = c(1,1))
+```
+
+### Maximum Favorable Excursion
+
+```{r 2-1-mfe, include = TRUE, fig.caption = "Maximum Favorable Excursion by Symbol"}
+par(mfrow = c(2,2))
+for(symbol in symbols) {
+    chart.ME(Portfolio = Cl.SMA20.Crossover, Symbol = symbol, type = "MFE", 
+             scale = "percent", legend.loc = "none")
+}
+par(mfrow = c(1,1))
 ```
 
 ```{r 2-1-individual-asset-returns}
@@ -109,7 +117,7 @@ rets.multi <- rets.multi[,c("TOTAL", symbols)]
 
 ### Cumulative Returns
 
-```{r 2-1-return-distribution-analysis, fig.cap = "Return Distribution Analysis"}
+```{r 2-1-return-distribution-analysis, include = TRUE, fig.cap = "Return Distribution Analysis"}
 as.data.frame(rets.multi) %>% 
     mutate(Date = index(rets.multi)) %>% 
     gather(key, value, 1:ncol(rets.multi)) %>% 
@@ -127,7 +135,7 @@ as.data.frame(rets.multi) %>%
 
 ### Annualized Returns
 
-```{r 2-1-annualized-risk-return}
+```{r 2-1-annualized-risk-return, include = TRUE}
 ar.tab <- table.AnnualizedReturns(rets.multi)
 max.risk <- max(ar.tab["Annualized Std Dev",])
 max.return <- max(ar.tab["Annualized Return",])
@@ -139,24 +147,25 @@ knitr::kable(data.frame("Max Risk" = max.risk,
 knitr::kable(t(ar.tab), booktabs = TRUE, caption = "Annualized Risk and Return")
 ```
 
-```{r 2-1-annualized-risk-return-chart, fig.cap = "Annualized Risk and Return"}
+```{r 2-1-annualized-risk-return-chart, include = TRUE, fig.cap = "Annualized Risk and Return"}
 chart.RiskReturnScatter(rets.multi, main = "Performance", 
                         colorset = rich10equal, xlim = c(0, max.risk * 1.1), 
                         ylim = c(0, max.return))
 ```
 
-```{r 2-1-consolidated-equity-curve, fig.cap = "Consolidated Equity Curve"}
+```{r 2-1-consolidated-equity-curve, include = TRUE, fig.cap = "Consolidated Equity Curve"}
 equity <- a$summary$End.Eq
 plot(equity, main = "Consolidated Equity Curve")
 ```
 
-```{r 2-1-asummary, fig.cap = "Account Summary"}
+```{r 2-1-asummary, include = TRUE, fig.cap = "Account Summary"}
 a <- getAccount(Cl.SMA20.Crossover)
 xyplot(a$summary, type = "h", col = 4)
 ```
 
-```{r}
+```{r 2-1-performance-summary, include = TRUE}
 ret <- Return.calculate(equity, method = "log")
 charts.PerformanceSummary(ret, colorset = bluefocus, 
                           main = strategy_title)
 ```
+
