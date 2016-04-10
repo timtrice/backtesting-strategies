@@ -1,0 +1,22 @@
+--- 
+title: "Techhnical Analysis Statistics in the Stock Market"
+author: "Tim Trice"
+date: "`r Sys.Date()`"
+knit: "bookdown::render_book"
+output:
+    bookdown::gitbook: default
+documentclass: book
+description: "This is a minimal example of using the bookdown package to write 
+    a book. The output format for this example is bookdown::gitbook."
+---
+
+## Introduction
+
+This book is designed to not only produce statistics on many of the most common technical patterns in the stock market, but to show actual trades in such scenarios.
+
+* Stock prices are adjusted
+
+* 30 domestic and international ETF's
+
+* Test a strategy; reject if results are not promising
+

@@ -1,0 +1,4 @@
+book_filename: "stock-book"
+chapter_name: "Chapter "
+output_dir: "book-output"
+before_chapter_script: ["./R/functions.R"]
