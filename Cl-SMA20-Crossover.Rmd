@@ -168,4 +168,3 @@ ret <- Return.calculate(equity, method = "log")
 charts.PerformanceSummary(ret, colorset = bluefocus, 
                           main = strategy_title)
 ```
-
