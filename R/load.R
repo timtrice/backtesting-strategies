@@ -1,8 +1,8 @@
 library(quantmod)
 library(quantstrat)
 
-knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = TRUE,
-                      include = TRUE, cache = FALSE, fig.align = "center")
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = TRUE,
+                      include = FALSE, cache = FALSE, fig.align = "center")
 
 pv <- list(
     source = "yahoo",
