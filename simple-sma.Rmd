@@ -1,0 +1,125 @@
+# Simple SMA Cross
+
+```{r, message = FALSE, warnings = FALSE}
+library(quantstrat)
+```
+
+```{r}
+Sys.setenv(TZ = "UTC")
+```
+
+```{r}
+currency("USD")
+```
+
+```{r}
+stock("SPY", 
+      currency = "USD", 
+      multiplier = 1)
+```
+
+```{r}
+getSymbols("SPY", 
+           src = "yahoo", 
+           index.class = c("POSIXt", "POSIXct"),
+           from = "2010-01-01", 
+           to = "2011-01-01", 
+           adjust = TRUE)
+```
+
+```{r}
+strat.name <- "Simple.SMA"
+```
+
+```{r}
+rm.strat(strat.name)
+```
+
+```{r}
+initPortf(strat.name, 
+          symbols = "SPY", 
+          initDate = "2010-01-01")
+```
+
+```{r}
+initAcct(strat.name, 
+         portfolios = strat.name, 
+         initDate = "2010-01-01", 
+         initEq = 10000)
+```
+
+```{r}
+initOrders(portfolio = strat.name, 
+           initDate = "2010-01-01")
+```
+
+```{r}
+strategy(strat.name, store = TRUE)
+```
+
+```{r}
+strat <- getStrategy(strat.name)
+```
+
+```{r 2-1-add-indicators}
+add.indicator(strategy = strat.name, 
+              name = "SMA", 
+              arguments = list(x = quote(Cl(mktdata)), 
+                               n = 20), 
+              label = "SMA20")
+```
+
+```{r 2-1-add-signals}
+add.signal(strat.name, 
+           name="sigCrossover", 
+           arguments = list(columns = c("Close", "SMA20"), 
+                            relationship = "gte"),
+           label="Cl.gte.SMA")
+
+add.signal(strat.name, 
+           name = "sigCrossover",
+           arguments = list(columns = c("Close", "SMA20"), 
+                            relationship = "lt"),
+           label = "Cl.lt.SMA")
+```
+
+```{r 2-1-add-rules}
+# BTO when Cl crosses above SMA(20)
+add.rule(strat.name, 
+         name = 'ruleSignal',
+         arguments = list(sigcol = "Cl.gte.SMA", 
+                          sigval = TRUE, 
+                          orderqty = 100,
+                          ordertype = 'market', 
+                          orderside = 'long'),
+         type = 'enter')
+
+# STC when Cl crosses under SMA(20)
+add.rule(strat.name, 
+         name = 'ruleSignal',
+         arguments = list(sigcol = "Cl.lt.SMA", 
+                          sigval = TRUE, 
+                          orderqty = 'all',
+                          ordertype = 'market', 
+                          orderside = 'long'),
+         type = 'exit')
+```
+
+```{r 2-1-apply-strategy, include = FALSE}
+applyStrategy(strategy = strat.name, 
+              portfolios = strat.name)
+```
+
+```{r 2-1-update-portfolio}
+updatePortf(strat.name)
+updateAcct(strat.name)
+updateEndEq(strat.name)
+```
+
+```{r}
+chart.Posn(strat.name, 
+           Symbol = "SPY", 
+           Dates = "2010::", 
+           TA="add_SMA(n=10,col=4, on=1, lwd=2)")
+```
+
