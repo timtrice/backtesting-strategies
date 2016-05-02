@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Backtesting Strategies with R</title>
+  <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+  <meta name="description" content="Backtesting strategies with R">
+  <meta name="generator" content="bookdown 0.0.62 and GitBook 2.6.7">
+
+  <meta property="og:title" content="Backtesting Strategies with R" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="Backtesting strategies with R" />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Backtesting Strategies with R" />
+  
+  <meta name="twitter:description" content="Backtesting strategies with R" />
+  
+
+<meta name="author" content="Tim Trice">
+
+<meta name="date" content="2016-05-02">
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  
+  
+<link rel="prev" href="warnings-and-errors.html">
+
+
+<script src="assets/jquery-2.2.3/jquery.min.js"></script>
+<link href="assets/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="assets/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="assets/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="assets/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="assets/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+
+
+
+
+
+
+
+<script src="assets/htmlwidgets-0.6/htmlwidgets.js"></script>
+<script src="assets/datatables-binding-0.1/datatables.js"></script>
+<script src="assets/datatables-1.10.7/jquery.dataTables.min.js"></script>
+<link href="assets/datatables-default-1.10.7/dataTables.extra.css" rel="stylesheet" />
+<link href="assets/datatables-default-1.10.7/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="assets/datatables-scroller-1.10.7/dataTables.scroller.min.css" rel="stylesheet" />
+<script src="assets/datatables-scroller-1.10.7/dataTables.scroller.min.js"></script>
+<link href="assets/datatables-fixedColumns-1.10.7/dataTables.fixedColumns.min.css" rel="stylesheet" />
+<script src="assets/datatables-fixedColumns-1.10.7/dataTables.fixedColumns.min.js"></script>
+<link href="assets/nouislider-7.0.10/jquery.nouislider.min.css" rel="stylesheet" />
+<script src="assets/nouislider-7.0.10/jquery.nouislider.min.js"></script>
+<link href="assets/selectize-0.12.0/selectize.bootstrap3.css" rel="stylesheet" />
+<script src="assets/selectize-0.12.0/selectize.min.js"></script>
+
+
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+<link rel="stylesheet" href="custom_styles.css" type="text/css" />
+</head>
+
+<body>
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Introduction</a><ul>
+<li class="chapter" data-level="1.1" data-path="index.html"><a href="index.html#r-resources"><i class="fa fa-check"></i><b>1.1</b> R Resources</a></li>
+<li class="chapter" data-level="1.2" data-path="index.html"><a href="index.html#libraries"><i class="fa fa-check"></i><b>1.2</b> Libraries</a></li>
+<li class="chapter" data-level="1.3" data-path="index.html"><a href="index.html#sessioninfo"><i class="fa fa-check"></i><b>1.3</b> SessionInfo</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="terminology.html"><a href="terminology.html"><i class="fa fa-check"></i><b>2</b> Terminology</a></li>
+<li class="chapter" data-level="3" data-path="using-quantstrat.html"><a href="using-quantstrat.html"><i class="fa fa-check"></i><b>3</b> Using Quantsrat</a><ul>
+<li class="chapter" data-level="3.1" data-path="using-quantstrat.html"><a href="using-quantstrat.html#settings-and-variables"><i class="fa fa-check"></i><b>3.1</b> Settings and Variables</a></li>
+<li class="chapter" data-level="3.2" data-path="using-quantstrat.html"><a href="using-quantstrat.html#symbols"><i class="fa fa-check"></i><b>3.2</b> Symbols</a></li>
+<li class="chapter" data-level="3.3" data-path="using-quantstrat.html"><a href="using-quantstrat.html#checkBlotterUpdate"><i class="fa fa-check"></i><b>3.3</b> checkBlotterUpdate()</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="get-symbols.html"><a href="get-symbols.html"><i class="fa fa-check"></i><b>4</b> Get Symbols</a><ul>
+<li class="chapter" data-level="4.1" data-path="get-symbols.html"><a href="get-symbols.html#google"><i class="fa fa-check"></i><b>4.1</b> Google</a></li>
+<li class="chapter" data-level="4.2" data-path="get-symbols.html"><a href="get-symbols.html#mysql"><i class="fa fa-check"></i><b>4.2</b> MySQL</a></li>
+<li class="chapter" data-level="4.3" data-path="get-symbols.html"><a href="get-symbols.html#fred"><i class="fa fa-check"></i><b>4.3</b> FRED</a></li>
+<li class="chapter" data-level="4.4" data-path="get-symbols.html"><a href="get-symbols.html#oanda"><i class="fa fa-check"></i><b>4.4</b> OANDA</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="basic-strategy.html"><a href="basic-strategy.html"><i class="fa fa-check"></i><b>5</b> Basic Strategy</a><ul>
+<li class="chapter" data-level="5.1" data-path="basic-strategy.html"><a href="basic-strategy.html#strategy-setup"><i class="fa fa-check"></i><b>5.1</b> Strategy Setup</a></li>
+<li class="chapter" data-level="5.2" data-path="basic-strategy.html"><a href="basic-strategy.html#add-indicators"><i class="fa fa-check"></i><b>5.2</b> Add Indicators</a></li>
+<li class="chapter" data-level="5.3" data-path="basic-strategy.html"><a href="basic-strategy.html#add-signals"><i class="fa fa-check"></i><b>5.3</b> Add Signals</a></li>
+<li class="chapter" data-level="5.4" data-path="basic-strategy.html"><a href="basic-strategy.html#add-rules"><i class="fa fa-check"></i><b>5.4</b> Add Rules</a></li>
+<li class="chapter" data-level="5.5" data-path="basic-strategy.html"><a href="basic-strategy.html#apply-strategy"><i class="fa fa-check"></i><b>5.5</b> Apply Strategy</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="data-quality.html"><a href="data-quality.html"><i class="fa fa-check"></i><b>6</b> Data Quality</a><ul>
+<li class="chapter" data-level="6.1" data-path="data-quality.html"><a href="data-quality.html#yahoo-vs.google"><i class="fa fa-check"></i><b>6.1</b> Yahoo! vs. Google</a></li>
+<li class="chapter" data-level="6.2" data-path="data-quality.html"><a href="data-quality.html#examining-trades"><i class="fa fa-check"></i><b>6.2</b> Examining Trades</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="parameter-optimization.html"><a href="parameter-optimization.html"><i class="fa fa-check"></i><b>7</b> Parameter Optimization</a><ul>
+<li class="chapter" data-level="7.1" data-path="parameter-optimization.html"><a href="parameter-optimization.html#add-distribution"><i class="fa fa-check"></i><b>7.1</b> Add Distribution</a></li>
+<li class="chapter" data-level="7.2" data-path="parameter-optimization.html"><a href="parameter-optimization.html#add-distribution-constraint"><i class="fa fa-check"></i><b>7.2</b> Add Distribution Constraint</a></li>
+<li class="chapter" data-level="7.3" data-path="parameter-optimization.html"><a href="parameter-optimization.html#running-parallel"><i class="fa fa-check"></i><b>7.3</b> Running Parallel</a></li>
+<li class="chapter" data-level="7.4" data-path="parameter-optimization.html"><a href="parameter-optimization.html#apply-paramset"><i class="fa fa-check"></i><b>7.4</b> Apply Paramset</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="stop-loss.html"><a href="stop-loss.html"><i class="fa fa-check"></i><b>8</b> Stop-Loss Orders</a><ul>
+<li class="chapter" data-level="8.1" data-path="stop-loss.html"><a href="stop-loss.html#add-indicators-1"><i class="fa fa-check"></i><b>8.1</b> Add Indicators</a></li>
+<li class="chapter" data-level="8.2" data-path="stop-loss.html"><a href="stop-loss.html#add-signals-1"><i class="fa fa-check"></i><b>8.2</b> Add Signals</a></li>
+<li class="chapter" data-level="8.3" data-path="stop-loss.html"><a href="stop-loss.html#add-rules-1"><i class="fa fa-check"></i><b>8.3</b> Add Rules</a></li>
+<li class="chapter" data-level="8.4" data-path="stop-loss.html"><a href="stop-loss.html#add-position-limit"><i class="fa fa-check"></i><b>8.4</b> Add Position Limit</a></li>
+<li class="chapter" data-level="8.5" data-path="stop-loss.html"><a href="stop-loss.html#enable-rules"><i class="fa fa-check"></i><b>8.5</b> Enable Rules</a></li>
+<li class="chapter" data-level="8.6" data-path="stop-loss.html"><a href="stop-loss.html#apply-strategy-1"><i class="fa fa-check"></i><b>8.6</b> Apply Strategy</a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="stop-loss-optimization.html"><a href="stop-loss-optimization.html"><i class="fa fa-check"></i><b>9</b> Stop Loss Optimization</a><ul>
+<li class="chapter" data-level="9.1" data-path="stop-loss-optimization.html"><a href="stop-loss-optimization.html#add-indicators-2"><i class="fa fa-check"></i><b>9.1</b> Add Indicators</a></li>
+<li class="chapter" data-level="9.2" data-path="stop-loss-optimization.html"><a href="stop-loss-optimization.html#add-signals-2"><i class="fa fa-check"></i><b>9.2</b> Add Signals</a></li>
+<li class="chapter" data-level="9.3" data-path="stop-loss-optimization.html"><a href="stop-loss-optimization.html#add-rules-2"><i class="fa fa-check"></i><b>9.3</b> Add Rules</a></li>
+<li class="chapter" data-level="9.4" data-path="stop-loss-optimization.html"><a href="stop-loss-optimization.html#add-position-limit-1"><i class="fa fa-check"></i><b>9.4</b> Add Position Limit</a></li>
+<li class="chapter" data-level="9.5" data-path="stop-loss-optimization.html"><a href="stop-loss-optimization.html#add-distribution-1"><i class="fa fa-check"></i><b>9.5</b> Add Distribution</a></li>
+<li class="chapter" data-level="9.6" data-path="stop-loss-optimization.html"><a href="stop-loss-optimization.html#add-distribution-constraint-1"><i class="fa fa-check"></i><b>9.6</b> Add Distribution Constraint</a></li>
+<li class="chapter" data-level="9.7" data-path="stop-loss-optimization.html"><a href="stop-loss-optimization.html#enable-rules-1"><i class="fa fa-check"></i><b>9.7</b> Enable Rules</a></li>
+<li class="chapter" data-level="9.8" data-path="stop-loss-optimization.html"><a href="stop-loss-optimization.html#apply-paramset-1"><i class="fa fa-check"></i><b>9.8</b> Apply Paramset</a></li>
+</ul></li>
+<li class="chapter" data-level="10" data-path="trailing-stops.html"><a href="trailing-stops.html"><i class="fa fa-check"></i><b>10</b> Trailing Stops</a><ul>
+<li class="chapter" data-level="10.1" data-path="trailing-stops.html"><a href="trailing-stops.html#osfixeddollar"><i class="fa fa-check"></i><b>10.1</b> osFixedDollar</a></li>
+<li class="chapter" data-level="10.2" data-path="trailing-stops.html"><a href="trailing-stops.html#add-indicators-3"><i class="fa fa-check"></i><b>10.2</b> Add Indicators</a></li>
+<li class="chapter" data-level="10.3" data-path="trailing-stops.html"><a href="trailing-stops.html#add-signals-3"><i class="fa fa-check"></i><b>10.3</b> Add Signals</a></li>
+<li class="chapter" data-level="10.4" data-path="trailing-stops.html"><a href="trailing-stops.html#add-rules-3"><i class="fa fa-check"></i><b>10.4</b> Add Rules</a></li>
+<li class="chapter" data-level="10.5" data-path="trailing-stops.html"><a href="trailing-stops.html#enable-rules-2"><i class="fa fa-check"></i><b>10.5</b> Enable Rules</a></li>
+<li class="chapter" data-level="10.6" data-path="trailing-stops.html"><a href="trailing-stops.html#save-strategy"><i class="fa fa-check"></i><b>10.6</b> Save Strategy</a></li>
+</ul></li>
+<li class="chapter" data-level="11" data-path="obtaining-resources.html"><a href="obtaining-resources.html"><i class="fa fa-check"></i><b>11</b> Obtaining Resources</a><ul>
+<li class="chapter" data-level="11.1" data-path="obtaining-resources.html"><a href="obtaining-resources.html#amazon-web-services"><i class="fa fa-check"></i><b>11.1</b> Amazon Web Services</a></li>
+<li class="chapter" data-level="11.2" data-path="obtaining-resources.html"><a href="obtaining-resources.html#getting-started"><i class="fa fa-check"></i><b>11.2</b> Getting Started</a><ul>
+<li class="chapter" data-level="11.2.1" data-path="obtaining-resources.html"><a href="obtaining-resources.html#installing-quantstrat"><i class="fa fa-check"></i><b>11.2.1</b> Installing Quantstrat</a></li>
+</ul></li>
+<li class="chapter" data-level="11.3" data-path="obtaining-resources.html"><a href="obtaining-resources.html#testing-resources"><i class="fa fa-check"></i><b>11.3</b> Testing Resources</a></li>
+<li class="chapter" data-level="11.4" data-path="obtaining-resources.html"><a href="obtaining-resources.html#changing-instances"><i class="fa fa-check"></i><b>11.4</b> Changing Instances</a></li>
+<li class="chapter" data-level="11.5" data-path="obtaining-resources.html"><a href="obtaining-resources.html#stop-the-server"><i class="fa fa-check"></i><b>11.5</b> Stop the Server</a></li>
+<li class="chapter" data-level="11.6" data-path="obtaining-resources.html"><a href="obtaining-resources.html#reading-resources"><i class="fa fa-check"></i><b>11.6</b> Reading Resources</a></li>
+</ul></li>
+<li class="chapter" data-level="12" data-path="analyzing-results.html"><a href="analyzing-results.html"><i class="fa fa-check"></i><b>12</b> Analyzing Results</a><ul>
+<li class="chapter" data-level="12.1" data-path="analyzing-results.html"><a href="analyzing-results.html#apply-strategy-2"><i class="fa fa-check"></i><b>12.1</b> Apply Strategy</a></li>
+<li class="chapter" data-level="12.2" data-path="analyzing-results.html"><a href="analyzing-results.html#chart-positions"><i class="fa fa-check"></i><b>12.2</b> Chart Positions</a></li>
+<li class="chapter" data-level="12.3" data-path="analyzing-results.html"><a href="analyzing-results.html#trade-statistics"><i class="fa fa-check"></i><b>12.3</b> Trade Statistics</a><ul>
+<li class="chapter" data-level="12.3.1" data-path="analyzing-results.html"><a href="analyzing-results.html#trade-related"><i class="fa fa-check"></i><b>12.3.1</b> Trade Related</a></li>
+<li class="chapter" data-level="12.3.2" data-path="analyzing-results.html"><a href="analyzing-results.html#profit-related"><i class="fa fa-check"></i><b>12.3.2</b> Profit Related</a></li>
+<li class="chapter" data-level="12.3.3" data-path="analyzing-results.html"><a href="analyzing-results.html#averages"><i class="fa fa-check"></i><b>12.3.3</b> Averages</a></li>
+<li class="chapter" data-level="12.3.4" data-path="analyzing-results.html"><a href="analyzing-results.html#performance-summary"><i class="fa fa-check"></i><b>12.3.4</b> Performance Summary</a></li>
+<li class="chapter" data-level="12.3.5" data-path="analyzing-results.html"><a href="analyzing-results.html#per-trade-statistics"><i class="fa fa-check"></i><b>12.3.5</b> Per Trade Statistics</a></li>
+<li class="chapter" data-level="12.3.6" data-path="analyzing-results.html"><a href="analyzing-results.html#performance-statistics"><i class="fa fa-check"></i><b>12.3.6</b> Performance Statistics</a></li>
+<li class="chapter" data-level="12.3.7" data-path="analyzing-results.html"><a href="analyzing-results.html#risk-statistics"><i class="fa fa-check"></i><b>12.3.7</b> Risk Statistics</a></li>
+<li class="chapter" data-level="12.3.8" data-path="analyzing-results.html"><a href="analyzing-results.html#buy-and-hold-performance"><i class="fa fa-check"></i><b>12.3.8</b> Buy and Hold Performance</a></li>
+<li class="chapter" data-level="12.3.9" data-path="analyzing-results.html"><a href="analyzing-results.html#strategy-vs.market"><i class="fa fa-check"></i><b>12.3.9</b> Strategy vs. Market</a></li>
+<li class="chapter" data-level="12.3.10" data-path="analyzing-results.html"><a href="analyzing-results.html#riskreturn-scatterplot"><i class="fa fa-check"></i><b>12.3.10</b> Risk/Return Scatterplot</a></li>
+<li class="chapter" data-level="12.3.11" data-path="analyzing-results.html"><a href="analyzing-results.html#relative-performance"><i class="fa fa-check"></i><b>12.3.11</b> Relative Performance</a></li>
+<li class="chapter" data-level="12.3.12" data-path="analyzing-results.html"><a href="analyzing-results.html#portfolio-summary"><i class="fa fa-check"></i><b>12.3.12</b> Portfolio Summary</a></li>
+<li class="chapter" data-level="12.3.13" data-path="analyzing-results.html"><a href="analyzing-results.html#order-book"><i class="fa fa-check"></i><b>12.3.13</b> Order Book</a></li>
+<li class="chapter" data-level="12.3.14" data-path="analyzing-results.html"><a href="analyzing-results.html#maximum-adverse-excursion"><i class="fa fa-check"></i><b>12.3.14</b> Maximum Adverse Excursion</a></li>
+<li class="chapter" data-level="12.3.15" data-path="analyzing-results.html"><a href="analyzing-results.html#maximum-favorable-excursion"><i class="fa fa-check"></i><b>12.3.15</b> Maximum Favorable Excursion</a></li>
+</ul></li>
+<li class="chapter" data-level="12.4" data-path="analyzing-results.html"><a href="analyzing-results.html#account-summary"><i class="fa fa-check"></i><b>12.4</b> Account Summary</a><ul>
+<li class="chapter" data-level="12.4.1" data-path="analyzing-results.html"><a href="analyzing-results.html#equity-curve"><i class="fa fa-check"></i><b>12.4.1</b> Equity Curve</a></li>
+<li class="chapter" data-level="12.4.2" data-path="analyzing-results.html"><a href="analyzing-results.html#account-performance-summary"><i class="fa fa-check"></i><b>12.4.2</b> Account Performance Summary</a></li>
+<li class="chapter" data-level="12.4.3" data-path="analyzing-results.html"><a href="analyzing-results.html#cumulative-returns"><i class="fa fa-check"></i><b>12.4.3</b> Cumulative Returns</a></li>
+<li class="chapter" data-level="12.4.4" data-path="analyzing-results.html"><a href="analyzing-results.html#distribution-analysis"><i class="fa fa-check"></i><b>12.4.4</b> Distribution Analysis</a></li>
+<li class="chapter" data-level="12.4.5" data-path="analyzing-results.html"><a href="analyzing-results.html#annualized-returns"><i class="fa fa-check"></i><b>12.4.5</b> Annualized Returns</a></li>
+<li class="chapter" data-level="12.4.6" data-path="analyzing-results.html"><a href="analyzing-results.html#performance-scatter-plot"><i class="fa fa-check"></i><b>12.4.6</b> Performance Scatter Plot</a></li>
+<li class="chapter" data-level="12.4.7" data-path="analyzing-results.html"><a href="analyzing-results.html#notional-costs"><i class="fa fa-check"></i><b>12.4.7</b> Notional Costs</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="13" data-path="walk-forward-analysis.html"><a href="walk-forward-analysis.html"><i class="fa fa-check"></i><b>13</b> Walk Forward Analysis</a></li>
+<li class="chapter" data-level="14" data-path="monte-carlo-analysis.html"><a href="monte-carlo-analysis.html"><i class="fa fa-check"></i><b>14</b> Monte Carlo Analysis</a></li>
+<li class="chapter" data-level="15" data-path="warnings-and-errors.html"><a href="warnings-and-errors.html"><i class="fa fa-check"></i><b>15</b> Warnings and Errors</a><ul>
+<li class="chapter" data-level="15.1" data-path="warnings-and-errors.html"><a href="warnings-and-errors.html#must-use-auto.assigntrue-for-multiple-symbols-requests"><i class="fa fa-check"></i><b>15.1</b> Must use auto.assign=TRUE for multiple Symbols requests</a></li>
+<li class="chapter" data-level="15.2" data-path="warnings-and-errors.html"><a href="warnings-and-errors.html#missing-in-call-to-function-add.distribution"><i class="fa fa-check"></i><b>15.2</b> Missing in call to function add.distribution</a></li>
+</ul></li>
+<li class="chapter" data-level="16" data-path="about-backtesting-strategies-with-r.html"><a href="about-backtesting-strategies-with-r.html"><i class="fa fa-check"></i><b>16</b> About “Backtesting Strategies with R”</a><ul>
+<li class="chapter" data-level="16.1" data-path="about-backtesting-strategies-with-r.html"><a href="about-backtesting-strategies-with-r.html#tim-trice"><i class="fa fa-check"></i><b>16.1</b> Tim Trice</a></li>
+<li class="chapter" data-level="16.2" data-path="about-backtesting-strategies-with-r.html"><a href="about-backtesting-strategies-with-r.html#to-you-the-reader"><i class="fa fa-check"></i><b>16.2</b> To You, the Reader</a></li>
+</ul></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Backtesting Strategies with R</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="about-backtesting-strategies-with-r" class="section level1">
+<h1><span class="header-section-number">Chapter 16</span> About “Backtesting Strategies with R”</h1>
+<p>This book is intended to <em>help you</em> do your own homework. This book is in no way, shape or form to be misconstrued as investment or trading guidance. It is for backtesting strategies only. What you do with your money on your time is your problem. There are many resources available for you to ask questions if you do not understand something. Use them.</p>
+<div id="tim-trice" class="section level2">
+<h2><span class="header-section-number">16.1</span> Tim Trice</h2>
+<p>My first foray into the stock market came in late 2007 and early 2008. It should go without saying this was a bad time to learn a new craft. I took a few years off before gradually working my way back into the market in 2011. I concentrate more on technical analysis. I had read many books discussing this-and-that pattern and strategy and how it worked and so forth but found in the real world things weren’t always what they seemed.</p>
+<p>In 2014 I began using my programming background to backtest strategies. Initially this was confined to downloading daily data and using Excel to test ideas. Shortly after I moved my backtesting to R and Python.</p>
+<p>I am, by no means, a quantitative trading expert. I have never worked for a large trading firm. I trade with my own money. I do not offer advice nor will I ever. I like solving puzzles. I like challenges. My intent with this book is to help bring together the vast resources available to test ideas ad nauseam so that hopefully some of you won’t make the same costly mistakes I made. If you can’t simulate it, don’t trade it.</p>
+</div>
+<div id="to-you-the-reader" class="section level2">
+<h2><span class="header-section-number">16.2</span> To You, the Reader</h2>
+<p>The source code for this book is available <a href="https://github.com/timtrice/stock-book">on Github</a>. All contributors will be acknolwedged on this page. Comments are included throughout the source code on things I would like to expand on or questions I have to address later. I will attempt to list them all on the <a href="https://github.com/timtrice/stock-book/issues">project issues page</a>.</p>
+<p>If you don’t understand something, <a href="http://timtrice.co/contact.html">let me know</a>. I will attempt to address it the best I can. If not, I will find the answer.</p>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="warnings-and-errors.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+
+
+<script src="assets/gitbook-2.6.7/js/app.js"></script>
+<script src="assets/gitbook-2.6.7/js/lunr.js"></script>
+<script src="assets/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="assets/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="assets/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="assets/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="assets/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script>
+require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"facebook": true,
+"twitter": true,
+"google": false,
+"weibo": false,
+"instapper": false,
+"vk": false,
+"all": ["facebook", "google", "twitter", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/timtrice/stock-book/edit/master/about.Rmd",
+"text": "Edit This Page"
+},
+"download": null,
+"toc": {
+"collapse": "subsection"
+},
+"toolbar": {
+"position": "static"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    if (location.protocol !== "file:" && /^https?:/.test(script.src))
+      script.src  = script.src.replace(/^https?:/, '');
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

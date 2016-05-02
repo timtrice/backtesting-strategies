@@ -16,6 +16,7 @@ output:
         css: toc.css
 documentclass: book
 description: "Backtesting strategies with R"
+output_dir: "/"
 ---
 
 ```{r index-comments, eval = FALSE, echo = FALSE}
@@ -23,7 +24,7 @@ description: "Backtesting strategies with R"
 # Live serve:
 #       bookdown:::serve_book()
 # Produce gitbook output: 
-#       bookdown:;render_book("index.Rmd", "bookdown::gitbook")
+#       bookdown::render_book("index.Rmd", "bookdown::gitbook")
 # To produce PDF output: 
 #       bookdown::render_book("index.Rmd", "bookdown::pdf_book")
 # Preview a chapter:

@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Backtesting Strategies with R</title>
+  <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+  <meta name="description" content="Backtesting strategies with R">
+  <meta name="generator" content="bookdown 0.0.62 and GitBook 2.6.7">
+
+  <meta property="og:title" content="Backtesting Strategies with R" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="Backtesting strategies with R" />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Backtesting Strategies with R" />
+  
+  <meta name="twitter:description" content="Backtesting strategies with R" />
+  
+
+<meta name="author" content="Tim Trice">
+
+<meta name="date" content="2016-05-02">
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  
+  
+<link rel="prev" href="basic-strategy.html">
+<link rel="next" href="parameter-optimization.html">
+
+<script src="assets/jquery-2.2.3/jquery.min.js"></script>
+<link href="assets/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="assets/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="assets/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="assets/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="assets/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+
+
+
+
+
+
+
+<script src="assets/htmlwidgets-0.6/htmlwidgets.js"></script>
+<script src="assets/datatables-binding-0.1/datatables.js"></script>
+<script src="assets/datatables-1.10.7/jquery.dataTables.min.js"></script>
+<link href="assets/datatables-default-1.10.7/dataTables.extra.css" rel="stylesheet" />
+<link href="assets/datatables-default-1.10.7/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="assets/datatables-scroller-1.10.7/dataTables.scroller.min.css" rel="stylesheet" />
+<script src="assets/datatables-scroller-1.10.7/dataTables.scroller.min.js"></script>
+<link href="assets/datatables-fixedColumns-1.10.7/dataTables.fixedColumns.min.css" rel="stylesheet" />
+<script src="assets/datatables-fixedColumns-1.10.7/dataTables.fixedColumns.min.js"></script>
+<link href="assets/nouislider-7.0.10/jquery.nouislider.min.css" rel="stylesheet" />
+<script src="assets/nouislider-7.0.10/jquery.nouislider.min.js"></script>
+<link href="assets/selectize-0.12.0/selectize.bootstrap3.css" rel="stylesheet" />
+<script src="assets/selectize-0.12.0/selectize.min.js"></script>
+
+
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+<link rel="stylesheet" href="custom_styles.css" type="text/css" />
+</head>
+
+<body>
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Introduction</a><ul>
+<li class="chapter" data-level="1.1" data-path="index.html"><a href="index.html#r-resources"><i class="fa fa-check"></i><b>1.1</b> R Resources</a></li>
+<li class="chapter" data-level="1.2" data-path="index.html"><a href="index.html#libraries"><i class="fa fa-check"></i><b>1.2</b> Libraries</a></li>
+<li class="chapter" data-level="1.3" data-path="index.html"><a href="index.html#sessioninfo"><i class="fa fa-check"></i><b>1.3</b> SessionInfo</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="terminology.html"><a href="terminology.html"><i class="fa fa-check"></i><b>2</b> Terminology</a></li>
+<li class="chapter" data-level="3" data-path="using-quantstrat.html"><a href="using-quantstrat.html"><i class="fa fa-check"></i><b>3</b> Using Quantsrat</a><ul>
+<li class="chapter" data-level="3.1" data-path="using-quantstrat.html"><a href="using-quantstrat.html#settings-and-variables"><i class="fa fa-check"></i><b>3.1</b> Settings and Variables</a></li>
+<li class="chapter" data-level="3.2" data-path="using-quantstrat.html"><a href="using-quantstrat.html#symbols"><i class="fa fa-check"></i><b>3.2</b> Symbols</a></li>
+<li class="chapter" data-level="3.3" data-path="using-quantstrat.html"><a href="using-quantstrat.html#checkBlotterUpdate"><i class="fa fa-check"></i><b>3.3</b> checkBlotterUpdate()</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="get-symbols.html"><a href="get-symbols.html"><i class="fa fa-check"></i><b>4</b> Get Symbols</a><ul>
+<li class="chapter" data-level="4.1" data-path="get-symbols.html"><a href="get-symbols.html#google"><i class="fa fa-check"></i><b>4.1</b> Google</a></li>
+<li class="chapter" data-level="4.2" data-path="get-symbols.html"><a href="get-symbols.html#mysql"><i class="fa fa-check"></i><b>4.2</b> MySQL</a></li>
+<li class="chapter" data-level="4.3" data-path="get-symbols.html"><a href="get-symbols.html#fred"><i class="fa fa-check"></i><b>4.3</b> FRED</a></li>
+<li class="chapter" data-level="4.4" data-path="get-symbols.html"><a href="get-symbols.html#oanda"><i class="fa fa-check"></i><b>4.4</b> OANDA</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="basic-strategy.html"><a href="basic-strategy.html"><i class="fa fa-check"></i><b>5</b> Basic Strategy</a><ul>
+<li class="chapter" data-level="5.1" data-path="basic-strategy.html"><a href="basic-strategy.html#strategy-setup"><i class="fa fa-check"></i><b>5.1</b> Strategy Setup</a></li>
+<li class="chapter" data-level="5.2" data-path="basic-strategy.html"><a href="basic-strategy.html#add-indicators"><i class="fa fa-check"></i><b>5.2</b> Add Indicators</a></li>
+<li class="chapter" data-level="5.3" data-path="basic-strategy.html"><a href="basic-strategy.html#add-signals"><i class="fa fa-check"></i><b>5.3</b> Add Signals</a></li>
+<li class="chapter" data-level="5.4" data-path="basic-strategy.html"><a href="basic-strategy.html#add-rules"><i class="fa fa-check"></i><b>5.4</b> Add Rules</a></li>
+<li class="chapter" data-level="5.5" data-path="basic-strategy.html"><a href="basic-strategy.html#apply-strategy"><i class="fa fa-check"></i><b>5.5</b> Apply Strategy</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="data-quality.html"><a href="data-quality.html"><i class="fa fa-check"></i><b>6</b> Data Quality</a><ul>
+<li class="chapter" data-level="6.1" data-path="data-quality.html"><a href="data-quality.html#yahoo-vs.google"><i class="fa fa-check"></i><b>6.1</b> Yahoo! vs. Google</a></li>
+<li class="chapter" data-level="6.2" data-path="data-quality.html"><a href="data-quality.html#examining-trades"><i class="fa fa-check"></i><b>6.2</b> Examining Trades</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="parameter-optimization.html"><a href="parameter-optimization.html"><i class="fa fa-check"></i><b>7</b> Parameter Optimization</a><ul>
+<li class="chapter" data-level="7.1" data-path="parameter-optimization.html"><a href="parameter-optimization.html#add-distribution"><i class="fa fa-check"></i><b>7.1</b> Add Distribution</a></li>
+<li class="chapter" data-level="7.2" data-path="parameter-optimization.html"><a href="parameter-optimization.html#add-distribution-constraint"><i class="fa fa-check"></i><b>7.2</b> Add Distribution Constraint</a></li>
+<li class="chapter" data-level="7.3" data-path="parameter-optimization.html"><a href="parameter-optimization.html#running-parallel"><i class="fa fa-check"></i><b>7.3</b> Running Parallel</a></li>
+<li class="chapter" data-level="7.4" data-path="parameter-optimization.html"><a href="parameter-optimization.html#apply-paramset"><i class="fa fa-check"></i><b>7.4</b> Apply Paramset</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="stop-loss.html"><a href="stop-loss.html"><i class="fa fa-check"></i><b>8</b> Stop-Loss Orders</a><ul>
+<li class="chapter" data-level="8.1" data-path="stop-loss.html"><a href="stop-loss.html#add-indicators-1"><i class="fa fa-check"></i><b>8.1</b> Add Indicators</a></li>
+<li class="chapter" data-level="8.2" data-path="stop-loss.html"><a href="stop-loss.html#add-signals-1"><i class="fa fa-check"></i><b>8.2</b> Add Signals</a></li>
+<li class="chapter" data-level="8.3" data-path="stop-loss.html"><a href="stop-loss.html#add-rules-1"><i class="fa fa-check"></i><b>8.3</b> Add Rules</a></li>
+<li class="chapter" data-level="8.4" data-path="stop-loss.html"><a href="stop-loss.html#add-position-limit"><i class="fa fa-check"></i><b>8.4</b> Add Position Limit</a></li>
+<li class="chapter" data-level="8.5" data-path="stop-loss.html"><a href="stop-loss.html#enable-rules"><i class="fa fa-check"></i><b>8.5</b> Enable Rules</a></li>
+<li class="chapter" data-level="8.6" data-path="stop-loss.html"><a href="stop-loss.html#apply-strategy-1"><i class="fa fa-check"></i><b>8.6</b> Apply Strategy</a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="stop-loss-optimization.html"><a href="stop-loss-optimization.html"><i class="fa fa-check"></i><b>9</b> Stop Loss Optimization</a><ul>
+<li class="chapter" data-level="9.1" data-path="stop-loss-optimization.html"><a href="stop-loss-optimization.html#add-indicators-2"><i class="fa fa-check"></i><b>9.1</b> Add Indicators</a></li>
+<li class="chapter" data-level="9.2" data-path="stop-loss-optimization.html"><a href="stop-loss-optimization.html#add-signals-2"><i class="fa fa-check"></i><b>9.2</b> Add Signals</a></li>
+<li class="chapter" data-level="9.3" data-path="stop-loss-optimization.html"><a href="stop-loss-optimization.html#add-rules-2"><i class="fa fa-check"></i><b>9.3</b> Add Rules</a></li>
+<li class="chapter" data-level="9.4" data-path="stop-loss-optimization.html"><a href="stop-loss-optimization.html#add-position-limit-1"><i class="fa fa-check"></i><b>9.4</b> Add Position Limit</a></li>
+<li class="chapter" data-level="9.5" data-path="stop-loss-optimization.html"><a href="stop-loss-optimization.html#add-distribution-1"><i class="fa fa-check"></i><b>9.5</b> Add Distribution</a></li>
+<li class="chapter" data-level="9.6" data-path="stop-loss-optimization.html"><a href="stop-loss-optimization.html#add-distribution-constraint-1"><i class="fa fa-check"></i><b>9.6</b> Add Distribution Constraint</a></li>
+<li class="chapter" data-level="9.7" data-path="stop-loss-optimization.html"><a href="stop-loss-optimization.html#enable-rules-1"><i class="fa fa-check"></i><b>9.7</b> Enable Rules</a></li>
+<li class="chapter" data-level="9.8" data-path="stop-loss-optimization.html"><a href="stop-loss-optimization.html#apply-paramset-1"><i class="fa fa-check"></i><b>9.8</b> Apply Paramset</a></li>
+</ul></li>
+<li class="chapter" data-level="10" data-path="trailing-stops.html"><a href="trailing-stops.html"><i class="fa fa-check"></i><b>10</b> Trailing Stops</a><ul>
+<li class="chapter" data-level="10.1" data-path="trailing-stops.html"><a href="trailing-stops.html#osfixeddollar"><i class="fa fa-check"></i><b>10.1</b> osFixedDollar</a></li>
+<li class="chapter" data-level="10.2" data-path="trailing-stops.html"><a href="trailing-stops.html#add-indicators-3"><i class="fa fa-check"></i><b>10.2</b> Add Indicators</a></li>
+<li class="chapter" data-level="10.3" data-path="trailing-stops.html"><a href="trailing-stops.html#add-signals-3"><i class="fa fa-check"></i><b>10.3</b> Add Signals</a></li>
+<li class="chapter" data-level="10.4" data-path="trailing-stops.html"><a href="trailing-stops.html#add-rules-3"><i class="fa fa-check"></i><b>10.4</b> Add Rules</a></li>
+<li class="chapter" data-level="10.5" data-path="trailing-stops.html"><a href="trailing-stops.html#enable-rules-2"><i class="fa fa-check"></i><b>10.5</b> Enable Rules</a></li>
+<li class="chapter" data-level="10.6" data-path="trailing-stops.html"><a href="trailing-stops.html#save-strategy"><i class="fa fa-check"></i><b>10.6</b> Save Strategy</a></li>
+</ul></li>
+<li class="chapter" data-level="11" data-path="obtaining-resources.html"><a href="obtaining-resources.html"><i class="fa fa-check"></i><b>11</b> Obtaining Resources</a><ul>
+<li class="chapter" data-level="11.1" data-path="obtaining-resources.html"><a href="obtaining-resources.html#amazon-web-services"><i class="fa fa-check"></i><b>11.1</b> Amazon Web Services</a></li>
+<li class="chapter" data-level="11.2" data-path="obtaining-resources.html"><a href="obtaining-resources.html#getting-started"><i class="fa fa-check"></i><b>11.2</b> Getting Started</a><ul>
+<li class="chapter" data-level="11.2.1" data-path="obtaining-resources.html"><a href="obtaining-resources.html#installing-quantstrat"><i class="fa fa-check"></i><b>11.2.1</b> Installing Quantstrat</a></li>
+</ul></li>
+<li class="chapter" data-level="11.3" data-path="obtaining-resources.html"><a href="obtaining-resources.html#testing-resources"><i class="fa fa-check"></i><b>11.3</b> Testing Resources</a></li>
+<li class="chapter" data-level="11.4" data-path="obtaining-resources.html"><a href="obtaining-resources.html#changing-instances"><i class="fa fa-check"></i><b>11.4</b> Changing Instances</a></li>
+<li class="chapter" data-level="11.5" data-path="obtaining-resources.html"><a href="obtaining-resources.html#stop-the-server"><i class="fa fa-check"></i><b>11.5</b> Stop the Server</a></li>
+<li class="chapter" data-level="11.6" data-path="obtaining-resources.html"><a href="obtaining-resources.html#reading-resources"><i class="fa fa-check"></i><b>11.6</b> Reading Resources</a></li>
+</ul></li>
+<li class="chapter" data-level="12" data-path="analyzing-results.html"><a href="analyzing-results.html"><i class="fa fa-check"></i><b>12</b> Analyzing Results</a><ul>
+<li class="chapter" data-level="12.1" data-path="analyzing-results.html"><a href="analyzing-results.html#apply-strategy-2"><i class="fa fa-check"></i><b>12.1</b> Apply Strategy</a></li>
+<li class="chapter" data-level="12.2" data-path="analyzing-results.html"><a href="analyzing-results.html#chart-positions"><i class="fa fa-check"></i><b>12.2</b> Chart Positions</a></li>
+<li class="chapter" data-level="12.3" data-path="analyzing-results.html"><a href="analyzing-results.html#trade-statistics"><i class="fa fa-check"></i><b>12.3</b> Trade Statistics</a><ul>
+<li class="chapter" data-level="12.3.1" data-path="analyzing-results.html"><a href="analyzing-results.html#trade-related"><i class="fa fa-check"></i><b>12.3.1</b> Trade Related</a></li>
+<li class="chapter" data-level="12.3.2" data-path="analyzing-results.html"><a href="analyzing-results.html#profit-related"><i class="fa fa-check"></i><b>12.3.2</b> Profit Related</a></li>
+<li class="chapter" data-level="12.3.3" data-path="analyzing-results.html"><a href="analyzing-results.html#averages"><i class="fa fa-check"></i><b>12.3.3</b> Averages</a></li>
+<li class="chapter" data-level="12.3.4" data-path="analyzing-results.html"><a href="analyzing-results.html#performance-summary"><i class="fa fa-check"></i><b>12.3.4</b> Performance Summary</a></li>
+<li class="chapter" data-level="12.3.5" data-path="analyzing-results.html"><a href="analyzing-results.html#per-trade-statistics"><i class="fa fa-check"></i><b>12.3.5</b> Per Trade Statistics</a></li>
+<li class="chapter" data-level="12.3.6" data-path="analyzing-results.html"><a href="analyzing-results.html#performance-statistics"><i class="fa fa-check"></i><b>12.3.6</b> Performance Statistics</a></li>
+<li class="chapter" data-level="12.3.7" data-path="analyzing-results.html"><a href="analyzing-results.html#risk-statistics"><i class="fa fa-check"></i><b>12.3.7</b> Risk Statistics</a></li>
+<li class="chapter" data-level="12.3.8" data-path="analyzing-results.html"><a href="analyzing-results.html#buy-and-hold-performance"><i class="fa fa-check"></i><b>12.3.8</b> Buy and Hold Performance</a></li>
+<li class="chapter" data-level="12.3.9" data-path="analyzing-results.html"><a href="analyzing-results.html#strategy-vs.market"><i class="fa fa-check"></i><b>12.3.9</b> Strategy vs. Market</a></li>
+<li class="chapter" data-level="12.3.10" data-path="analyzing-results.html"><a href="analyzing-results.html#riskreturn-scatterplot"><i class="fa fa-check"></i><b>12.3.10</b> Risk/Return Scatterplot</a></li>
+<li class="chapter" data-level="12.3.11" data-path="analyzing-results.html"><a href="analyzing-results.html#relative-performance"><i class="fa fa-check"></i><b>12.3.11</b> Relative Performance</a></li>
+<li class="chapter" data-level="12.3.12" data-path="analyzing-results.html"><a href="analyzing-results.html#portfolio-summary"><i class="fa fa-check"></i><b>12.3.12</b> Portfolio Summary</a></li>
+<li class="chapter" data-level="12.3.13" data-path="analyzing-results.html"><a href="analyzing-results.html#order-book"><i class="fa fa-check"></i><b>12.3.13</b> Order Book</a></li>
+<li class="chapter" data-level="12.3.14" data-path="analyzing-results.html"><a href="analyzing-results.html#maximum-adverse-excursion"><i class="fa fa-check"></i><b>12.3.14</b> Maximum Adverse Excursion</a></li>
+<li class="chapter" data-level="12.3.15" data-path="analyzing-results.html"><a href="analyzing-results.html#maximum-favorable-excursion"><i class="fa fa-check"></i><b>12.3.15</b> Maximum Favorable Excursion</a></li>
+</ul></li>
+<li class="chapter" data-level="12.4" data-path="analyzing-results.html"><a href="analyzing-results.html#account-summary"><i class="fa fa-check"></i><b>12.4</b> Account Summary</a><ul>
+<li class="chapter" data-level="12.4.1" data-path="analyzing-results.html"><a href="analyzing-results.html#equity-curve"><i class="fa fa-check"></i><b>12.4.1</b> Equity Curve</a></li>
+<li class="chapter" data-level="12.4.2" data-path="analyzing-results.html"><a href="analyzing-results.html#account-performance-summary"><i class="fa fa-check"></i><b>12.4.2</b> Account Performance Summary</a></li>
+<li class="chapter" data-level="12.4.3" data-path="analyzing-results.html"><a href="analyzing-results.html#cumulative-returns"><i class="fa fa-check"></i><b>12.4.3</b> Cumulative Returns</a></li>
+<li class="chapter" data-level="12.4.4" data-path="analyzing-results.html"><a href="analyzing-results.html#distribution-analysis"><i class="fa fa-check"></i><b>12.4.4</b> Distribution Analysis</a></li>
+<li class="chapter" data-level="12.4.5" data-path="analyzing-results.html"><a href="analyzing-results.html#annualized-returns"><i class="fa fa-check"></i><b>12.4.5</b> Annualized Returns</a></li>
+<li class="chapter" data-level="12.4.6" data-path="analyzing-results.html"><a href="analyzing-results.html#performance-scatter-plot"><i class="fa fa-check"></i><b>12.4.6</b> Performance Scatter Plot</a></li>
+<li class="chapter" data-level="12.4.7" data-path="analyzing-results.html"><a href="analyzing-results.html#notional-costs"><i class="fa fa-check"></i><b>12.4.7</b> Notional Costs</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="13" data-path="walk-forward-analysis.html"><a href="walk-forward-analysis.html"><i class="fa fa-check"></i><b>13</b> Walk Forward Analysis</a></li>
+<li class="chapter" data-level="14" data-path="monte-carlo-analysis.html"><a href="monte-carlo-analysis.html"><i class="fa fa-check"></i><b>14</b> Monte Carlo Analysis</a></li>
+<li class="chapter" data-level="15" data-path="warnings-and-errors.html"><a href="warnings-and-errors.html"><i class="fa fa-check"></i><b>15</b> Warnings and Errors</a><ul>
+<li class="chapter" data-level="15.1" data-path="warnings-and-errors.html"><a href="warnings-and-errors.html#must-use-auto.assigntrue-for-multiple-symbols-requests"><i class="fa fa-check"></i><b>15.1</b> Must use auto.assign=TRUE for multiple Symbols requests</a></li>
+<li class="chapter" data-level="15.2" data-path="warnings-and-errors.html"><a href="warnings-and-errors.html#missing-in-call-to-function-add.distribution"><i class="fa fa-check"></i><b>15.2</b> Missing in call to function add.distribution</a></li>
+</ul></li>
+<li class="chapter" data-level="16" data-path="about-backtesting-strategies-with-r.html"><a href="about-backtesting-strategies-with-r.html"><i class="fa fa-check"></i><b>16</b> About “Backtesting Strategies with R”</a><ul>
+<li class="chapter" data-level="16.1" data-path="about-backtesting-strategies-with-r.html"><a href="about-backtesting-strategies-with-r.html#tim-trice"><i class="fa fa-check"></i><b>16.1</b> Tim Trice</a></li>
+<li class="chapter" data-level="16.2" data-path="about-backtesting-strategies-with-r.html"><a href="about-backtesting-strategies-with-r.html#to-you-the-reader"><i class="fa fa-check"></i><b>16.2</b> To You, the Reader</a></li>
+</ul></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Backtesting Strategies with R</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="data-quality" class="section level1">
+<h1><span class="header-section-number">Chapter 6</span> Data Quality</h1>
+<p>Before doing any analysis you must always check the data to ensure quality. Do not assume that because you are getting it from a source such as Yahoo! or Google that it is clean. I’ll show you why.</p>
+<div id="yahoo-vs.google" class="section level2">
+<h2><span class="header-section-number">6.1</span> Yahoo! vs. Google</h2>
+<p>I’ll use <strong>dplyr 0.4.3</strong>, <strong>ggplot2 2.0.0</strong> and <strong>tidyr 0.4.1</strong> to help with analysis.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">getSymbols</span>(<span class="st">&quot;SPY&quot;</span>, 
+           <span class="dt">src =</span> <span class="st">&quot;yahoo&quot;</span>, 
+           <span class="dt">index.class =</span> <span class="kw">c</span>(<span class="st">&quot;POSIXt&quot;</span>, <span class="st">&quot;POSIXct&quot;</span>),
+           <span class="dt">from =</span> <span class="st">&quot;2010-01-01&quot;</span>, 
+           <span class="dt">to =</span> <span class="st">&quot;2011-01-01&quot;</span>, 
+           <span class="dt">adjust =</span> <span class="ot">TRUE</span>)</code></pre></div>
+<pre><code>## [1] &quot;SPY&quot;</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">yahoo.SPY &lt;-<span class="st"> </span>SPY
+<span class="kw">summary</span>(yahoo.SPY)</code></pre></div>
+<pre><code>##      Index                        SPY.Open        SPY.High    
+##  Min.   :2010-01-04 00:00:00   Min.   :102.0   Min.   :102.3  
+##  1st Qu.:2010-04-05 18:00:00   1st Qu.:108.0   1st Qu.:108.9  
+##  Median :2010-07-04 00:00:00   Median :112.0   Median :112.7  
+##  Mean   :2010-07-03 16:28:34   Mean   :112.8   Mean   :113.5  
+##  3rd Qu.:2010-10-01 18:00:00   3rd Qu.:117.4   3rd Qu.:118.1  
+##  Max.   :2010-12-31 00:00:00   Max.   :126.0   Max.   :126.2  
+##     SPY.Low        SPY.Close       SPY.Volume         SPY.Adjusted   
+##  Min.   :100.1   Min.   :101.1   Min.   : 55309100   Min.   : 90.81  
+##  1st Qu.:107.3   1st Qu.:108.2   1st Qu.:156667725   1st Qu.: 97.19  
+##  Median :111.2   Median :112.0   Median :192116250   Median :100.59  
+##  Mean   :112.0   Mean   :112.9   Mean   :209692210   Mean   :101.36  
+##  3rd Qu.:116.7   3rd Qu.:117.5   3rd Qu.:240310650   3rd Qu.:105.56  
+##  Max.   :125.9   Max.   :125.9   Max.   :647356600   Max.   :113.07</code></pre>
+<p>Above is a summary for the <strong>SPY</strong> data we received from Yahoo!. Examining each of the variables does not show anything out of the ordinary.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">rm</span>(SPY)
+<span class="kw">getSymbols</span>(<span class="st">&quot;SPY&quot;</span>, 
+           <span class="dt">src =</span> <span class="st">&quot;google&quot;</span>, 
+           <span class="dt">index.class =</span> <span class="kw">c</span>(<span class="st">&quot;POSIXt&quot;</span>, <span class="st">&quot;POSIXct&quot;</span>),
+           <span class="dt">from =</span> <span class="st">&quot;2010-01-01&quot;</span>, 
+           <span class="dt">to =</span> <span class="st">&quot;2011-01-01&quot;</span>, 
+           <span class="dt">adjust =</span> <span class="ot">TRUE</span>)</code></pre></div>
+<pre><code>## [1] &quot;SPY&quot;</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">google.SPY &lt;-<span class="st"> </span>SPY
+<span class="kw">summary</span>(google.SPY)</code></pre></div>
+<pre><code>##      Index               SPY.Open        SPY.High        SPY.Low     
+##  Min.   :2010-01-04   Min.   :103.1   Min.   :103.5   Min.   :101.1  
+##  1st Qu.:2010-04-05   1st Qu.:109.4   1st Qu.:110.4   1st Qu.:108.9  
+##  Median :2010-07-04   Median :113.9   Median :114.5   Median :113.1  
+##  Mean   :2010-07-03   Mean   :114.2   Mean   :114.9   Mean   :113.4  
+##  3rd Qu.:2010-10-01   3rd Qu.:118.4   3rd Qu.:119.0   3rd Qu.:117.8  
+##  Max.   :2010-12-31   Max.   :126.0   Max.   :126.2   Max.   :125.9  
+##                       NA&#39;s   :8       NA&#39;s   :8       NA&#39;s   :8      
+##    SPY.Close       SPY.Volume       
+##  Min.   :102.2   Min.   :        0  
+##  1st Qu.:109.7   1st Qu.:151055510  
+##  Median :113.8   Median :188064051  
+##  Mean   :114.2   Mean   :203756549  
+##  3rd Qu.:118.5   3rd Qu.:239588977  
+##  Max.   :125.9   Max.   :647356524  
+## </code></pre>
+<p>Now we have a dataset from Google. it’s for the same symbol and same time frame. But now we have NA values - 8, in fact. In addition, our percentiles do not match up for any of the variables (with the exception of <code>Date</code>).</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">bind_rows</span>(<span class="kw">as.data.frame</span>(yahoo.SPY) %&gt;%<span class="st"> </span>
+<span class="st">              </span><span class="kw">mutate</span>(<span class="dt">Src =</span> <span class="st">&quot;Yahoo&quot;</span>), 
+          <span class="kw">as.data.frame</span>(google.SPY) %&gt;%<span class="st"> </span>
+<span class="st">              </span><span class="kw">mutate</span>(<span class="dt">Src =</span> <span class="st">&quot;Google&quot;</span>)) %&gt;%<span class="st"> </span>
+<span class="st">    </span><span class="kw">gather</span>(key, value, <span class="dv">1</span>:<span class="dv">4</span>, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>) %&gt;%<span class="st"> </span>
+<span class="st">    </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(<span class="dt">x =</span> key, <span class="dt">y =</span> value, <span class="dt">fill =</span> Src)) +<span class="st"> </span>
+<span class="st">    </span><span class="kw">geom_boxplot</span>() +<span class="st"> </span>
+<span class="st">    </span><span class="kw">theme_bw</span>() +<span class="st"> </span>
+<span class="st">    </span><span class="kw">theme</span>(<span class="dt">legend.title =</span> <span class="kw">element_blank</span>(), <span class="dt">legend.position =</span> <span class="st">&quot;bottom&quot;</span>) +<span class="st"> </span>
+<span class="st">    </span><span class="kw">ggtitle</span>(<span class="st">&quot;Google vs. Yahoo! (non-NA)&quot;</span>)</code></pre></div>
+<p><img src="_main_files/figure-html/data-quality-a-boxplot-1.png" title="" alt="" style="display: block; margin: auto;" /></p>
+<p>We can see above clearly we have a mismatch of data between Google and Yahoo!. For one reason, Google does not supply a full day of data for holidays and early sessions. Let’s look at the NA values:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">as.data.frame</span>(google.SPY) %&gt;%<span class="st"> </span>
+<span class="st">    </span><span class="kw">mutate</span>(<span class="dt">Date =</span> <span class="kw">index</span>(google.SPY)) %&gt;%<span class="st"> </span>
+<span class="st">    </span><span class="kw">select</span>(Date, <span class="kw">starts_with</span>(<span class="st">&quot;SPY&quot;</span>), -SPY.Volume) %&gt;%<span class="st"> </span>
+<span class="st">    </span><span class="kw">filter</span>(<span class="kw">is.na</span>(SPY.Open))</code></pre></div>
+<pre><code>##         Date SPY.Open SPY.High SPY.Low SPY.Close
+## 1 2010-01-15       NA       NA      NA    113.64
+## 2 2010-02-12       NA       NA      NA    108.04
+## 3 2010-04-01       NA       NA      NA    117.80
+## 4 2010-05-28       NA       NA      NA    109.37
+## 5 2010-07-02       NA       NA      NA    102.20
+## 6 2010-09-03       NA       NA      NA    110.89
+## 7 2010-11-24       NA       NA      NA    120.20
+## 8 2010-12-23       NA       NA      NA    125.60</code></pre>
+<p>We can see many of these dates correspond closely to national holidays; <em>2010-11-24</em> would be Thanksgiving, <em>2010-12-23</em> would be Christimas.</p>
+<p>So where Yahoo! does give OHLC values for these dates, Google just provides the Close. This won’t affect most indicators that typically use closing data (moving averages, Bollinger Bands, etc.). However, if you are working on a strategy that triggers a day prior to one of these holidays, and you issue a buy order for the next morning, this may cause some integrity loss.</p>
+<p>This doesn’t mean you should only use Yahoo!. At this point we don’t know the quality of Yahoo!’s data - we only know it <em>seems</em> complete. And this may be enough depending on what you want to do.</p>
+<p>However, it’s up to you to ensure your data is top quality.</p>
+<blockquote>
+<p>Garbage in, garbage out</p>
+</blockquote>
+</div>
+<div id="examining-trades" class="section level2">
+<h2><span class="header-section-number">6.2</span> Examining Trades</h2>
+<p>It’s not just data that we want to QA against but also our trades. After all, how disappointing would it be to think you have a winning strategy only to learn you were buying on tomorrow’s close instead of today (look-ahead bias). Or that you wrote your rules incorrectly?</p>
+<p>Every backtest must be picked apart from beginning to end. Checking our data was the first step. Checking our trades is next.</p>
+<p>We’ll reload our <strong>Luxor</strong> strategy and examine some of the trades for <strong>SPY</strong>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">rm.strat</span>(portfolio.st)
+<span class="kw">rm.strat</span>(account.st)
+symbols &lt;-<span class="st"> </span><span class="kw">basic_symbols</span>()
+<span class="kw">getSymbols</span>(<span class="dt">Symbols =</span> symbols, <span class="dt">src =</span> <span class="st">&quot;yahoo&quot;</span>, <span class="dt">index.class =</span> <span class="st">&quot;POSIXct&quot;</span>, 
+           <span class="dt">from =</span> start_date, <span class="dt">to =</span> end_date, <span class="dt">adjust =</span> adjustment)
+<span class="kw">initPortf</span>(<span class="dt">name =</span> portfolio.st, <span class="dt">symbols =</span> symbols, <span class="dt">initDate =</span> init_date)
+<span class="kw">initAcct</span>(<span class="dt">name =</span> account.st, <span class="dt">portfolios =</span> portfolio.st, <span class="dt">initDate =</span> init_date, 
+         <span class="dt">initEq =</span> init_equity)
+<span class="kw">initOrders</span>(<span class="dt">portfolio =</span> portfolio.st, <span class="dt">symbols =</span> symbols, <span class="dt">initDate =</span> init_date)
+<span class="kw">applyStrategy</span>(strategy.st, <span class="dt">portfolios =</span> portfolio.st)
+<span class="kw">checkBlotterUpdate</span>(portfolio.st, account.st, <span class="dt">verbose =</span> <span class="ot">TRUE</span>)
+<span class="kw">updatePortf</span>(portfolio.st)
+<span class="kw">updateAcct</span>(account.st)
+<span class="kw">updateEndEq</span>(account.st)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">chart.Posn</span>(portfolio.st, <span class="dt">Symbol =</span> <span class="st">&quot;SPY&quot;</span>, <span class="dt">Dates=</span><span class="st">&quot;2008-01-01::2008-07-01&quot;</span>, 
+           <span class="dt">TA=</span><span class="st">&quot;add_SMA(n = 10, col = 2); add_SMA(n = 30, col = 4)&quot;</span>)</code></pre></div>
+<div class="figure" style="text-align: center"><span id="fig:data-quality-b-chart-posn-1"></span>
+<img src="_main_files/figure-html/data-quality-b-chart-posn-1-1.png" alt="SPY Trades for Jan 1, 2008 to July 1, 2008"  />
+<p class="caption">
+Figure 6.1: SPY Trades for Jan 1, 2008 to July 1, 2008
+</p>
+</div>
+<p>Our strategy called for a long entry when SMA(10) was greater than or equal to SMA(30). It seems we got a cross on February 25 but the trade didn’t trigger until two days later. Let’s take a look.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">le &lt;-<span class="st"> </span><span class="kw">as.data.frame</span>(mktdata[<span class="st">&quot;2008-02-25::2008-03-07&quot;</span>, <span class="kw">c</span>(<span class="dv">1</span>:<span class="dv">4</span>, <span class="dv">7</span>:<span class="dv">10</span>)])
+DT::<span class="kw">datatable</span>(le, 
+              <span class="dt">rownames =</span> <span class="ot">TRUE</span>,
+              <span class="dt">extensions =</span> <span class="kw">c</span>(<span class="st">&quot;Scroller&quot;</span>, <span class="st">&quot;FixedColumns&quot;</span>), 
+              <span class="dt">options =</span> <span class="kw">list</span>(<span class="dt">pageLength =</span> <span class="dv">5</span>, 
+                             <span class="dt">autoWidth =</span> <span class="ot">TRUE</span>, 
+                             <span class="dt">deferRender =</span> <span class="ot">TRUE</span>, 
+                             <span class="dt">scrollX =</span> <span class="dv">200</span>, 
+                             <span class="dt">scroller =</span> <span class="ot">TRUE</span>,
+                             <span class="dt">fixedColumns =</span> <span class="ot">TRUE</span>), 
+              <span class="dt">caption =</span> htmltools::tags$<span class="kw">caption</span>(
+                  <span class="st">&quot;Table 6.1: mktdata object for Feb. 25, 2008 to Mar. 7, 2008&quot;</span>))</code></pre></div>
+<p><div id="htmlwidget-6895" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-6895">{"x":{"data":[["2008-02-25","2008-02-26","2008-02-27","2008-02-28","2008-02-29","2008-03-03","2008-03-04","2008-03-05","2008-03-06","2008-03-07"],[129.359620662662,130.514453587282,131.287517180531,130.982115267941,129.41689718115,127.069061938547,126.20055338785,127.336293503373,126.91635477864,123.852732461276],[131.373409529819,132.614134803726,132.795473064863,131.669286511902,129.493236922276,127.708510226584,127.317201648678,128.624741733205,127.145415995702,125.732905068818],[128.63428097974,130.275853123686,131.144362628784,130.323576079611,126.725477270968,126.210105996011,125.017103678028,126.305537591833,124.597164953295,122.716992345753],[131.06800857163,132.051041527246,131.917425267632,130.628977037799,127.718062834744,127.412647560528,126.9259073868,127.727602081279,125.083905127022,123.795471213218],[129.283274145282,129.723253495594,130.0315249128,130.07924500552,129.950401614139,129.79387980546,129.552416231741,129.352946625935,128.99695521145,128.43290486079],[129.298863504239,129.241917749621,129.1445688241,129.10321131497,129.002681336255,129.004908496609,129.034495176789,129.133434867507,129.044357265658,128.876382602913],[null,1,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null,1,null]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> \u003c/th>\n      <th>SPY.Open\u003c/th>\n      <th>SPY.High\u003c/th>\n      <th>SPY.Low\u003c/th>\n      <th>SPY.Close\u003c/th>\n      <th>SMA.nFast\u003c/th>\n      <th>SMA.nSlow\u003c/th>\n      <th>long\u003c/th>\n      <th>short\u003c/th>\n    \u003c/tr>\n  \u003c/thead>\n\u003c/table>","options":{"pageLength":5,"autoWidth":true,"deferRender":true,"scrollX":200,"scroller":true,"fixedColumns":true,"columnDefs":[{"className":"dt-right","targets":[1,2,3,4,5,6,7,8]},{"orderable":false,"targets":0}],"order":[],"orderClasses":false,"lengthMenu":[5,10,25,50,100]},"callback":null,"caption":"<caption>Table 6.1: mktdata object for Feb. 25, 2008 to Mar. 7, 2008\u003c/caption>","filter":"none","extensions":["Scroller","FixedColumns"],"extOptions":{"FixedColumns":null},"selection":"multiple"},"evals":[],"jsHooks":[]}</script></p>
+<p>The <strong>2008-02-25T00:00:00Z</strong> bar shows <code>nFast</code> just fractions of a penny lower than <code>nSlow</code>. We get the cross on <strong>2008-02-26T00:00:00Z</strong> which gives a TRUE <code>long</code> signal. Our high on that bar is $132.61 which would be our stoplimit. On the <strong>2008-02-27T00:00:00Z</strong> bar we get a higher high which means our stoplimit order gets filled at $132.61. This is reflected by the faint green arrow at the top of the candles upper shadow.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ob &lt;-<span class="st"> </span><span class="kw">as.data.table</span>(<span class="kw">getOrderBook</span>(portfolio.st)$Quantstrat$SPY)
+DT::<span class="kw">datatable</span>(ob, 
+              <span class="dt">rownames =</span> <span class="ot">FALSE</span>,
+              <span class="dt">filter =</span> <span class="st">&quot;top&quot;</span>,
+              <span class="dt">extensions =</span> <span class="kw">c</span>(<span class="st">&quot;Scroller&quot;</span>, <span class="st">&quot;FixedColumns&quot;</span>), 
+              <span class="dt">options =</span> <span class="kw">list</span>(<span class="dt">pageLength =</span> <span class="dv">5</span>, 
+                             <span class="dt">autoWidth =</span> <span class="ot">TRUE</span>, 
+                             <span class="dt">deferRender =</span> <span class="ot">TRUE</span>, 
+                             <span class="dt">scrollX =</span> <span class="dv">200</span>, 
+                             <span class="dt">scroller =</span> <span class="ot">TRUE</span>, 
+                             <span class="dt">fixedColumns =</span> <span class="ot">TRUE</span>), 
+              <span class="dt">caption =</span> htmltools::tags$<span class="kw">caption</span>(
+                  <span class="st">&quot;Table 6.2: Order book for SPY&quot;</span>))</code></pre></div>
+<pre><code>## Warning in min(d, na.rm = TRUE): no non-missing arguments to min; returning
+## Inf</code></pre>
+<pre><code>## Warning in max(d, na.rm = TRUE): no non-missing arguments to max; returning
+## -Inf</code></pre>
+<p><div id="htmlwidget-9222" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-9222">{"x":null,"evals":[],"jsHooks":[]}</script></p>
+<p>When we look at the order book (Table 6.2) we get confirmation of our order. <code>index</code> reflects the date the order was submitted. <code>Order.StatusTime</code> reflects when the order was filled.</p>
+<p>(Regarding the time stamp, ignore it. No time was provided so by default it falls to midnight Zulu time which is four to five hours ahead of EST/EDT (depending on time of year) which technically would be the previous day. To avoid confusion, just note the dates.)</p>
+<p>If we look at <code>Rule</code> we see the value of <em>EnterLONG</em>. These are the <code>labels</code> of the rules we set up in our strategy. Now you can see how all these labels we assigned earlier start coming together.</p>
+<p>On <strong>2008-03-06T00:00:00Z</strong> we get a market order to vacate all long positions and take a short positions. We see this charted in Fig. 6.1 identified with a red arrow on the same candle one bar after the cross. We stay in that position until <strong>2008-04-01T00:00:00Z</strong> when we flip back long.</p>
+<p>If you flip to page 5 of Table 6.2, on <strong>2009-11-03T00:00:00Z</strong> you will see we had an order replaced (<code>Order.Status</code>). Let’s plot this time frame and see what was going on.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">chart.Posn</span>(portfolio.st, <span class="dt">Symbol =</span> <span class="st">&quot;SPY&quot;</span>, <span class="dt">Dates=</span><span class="st">&quot;2009-08-01::2009-12-31&quot;</span>, 
+           <span class="dt">TA=</span><span class="st">&quot;add_SMA(n = 10, col = 2); add_SMA(n = 30, col = 4)&quot;</span>)</code></pre></div>
+<div class="figure" style="text-align: center"><span id="fig:data-quality-b-chart-posn-2"></span>
+<img src="_main_files/figure-html/data-quality-b-chart-posn-2-1.png" alt="SPY Trades for Jan 1, 2008 to July 1, 2008"  />
+<p class="caption">
+Figure 6.2: SPY Trades for Jan 1, 2008 to July 1, 2008
+</p>
+</div>
+<p>We got a bearish SMA cross on November 2 which submitted the short order. However, our stoplimit was with a preference of the Low and a threshold of $0.0005 or $102.98. So the order would only fill if we broke below that price. As you see, that never happened. The order stayed open until we got the bullish SMA cross on Nov. 11. At that point our short order was replaced with our long order to buy; a stoplimit at $109.50. Nov. 12 saw an inside day; the high wasn’t breached therefore the order wasn’t filled. However, on Nov. 13 we rallied past the high triggering the long order (green arrow). This is the last position taken in our order book.</p>
+<p>So it seems the orders are triggering as expected.</p>
+<p>On a side note, when I was originally writing the code I realized my short order was for +100 shares instead of -100 shares; actually, <code>orderqty = 100</code> which meant I wasn’t really taking short positions.</p>
+<p>This is why you really need to examine your strategies as soon as you create them. Before noticing the error the profit to drawdown ratio was poor. After correcting the error, it was worse. It only takes a minor barely recognizable typo to ruin results.</p>
+<p>Finally, we’ll get to the <code>chart.Posn()</code> function later in the analysis chapters. For now I want to point out one flaw (in my opinion) with the function. You may have noticed our indicators and positions didn’t show up immediately on the chart. Our indicators didn’t appear until the 10-bar and 30-bar periods had passed. And our positions didn’t show up until a new trade was made.</p>
+<p>You may also notice our CumPL and Drawdown graphs started at 0 on the last chart posted.</p>
+<p><code>chart.Posn()</code> doesn’t “zoom in” as you may think. Rather it just operates on a subset of data when using the <code>Dates</code> parameter. Effectively, it’s adjusting your strategy to the <code>Dates</code> parameter that is passed.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">chart.Posn</span>(portfolio.st, <span class="dt">Symbol =</span> <span class="st">&quot;SPY&quot;</span>, 
+           <span class="dt">TA=</span><span class="st">&quot;add_SMA(n = 10, col = 2); add_SMA(n = 30, col = 4)&quot;</span>)</code></pre></div>
+<div class="figure" style="text-align: center"><span id="fig:data-quality-b-chart-posn-3"></span>
+<img src="_main_files/figure-html/data-quality-b-chart-posn-3-1.png" alt="SPY Trades for Jan 1, 2008 to July 1, 2008"  />
+<p class="caption">
+Figure 6.3: SPY Trades for Jan 1, 2008 to July 1, 2008
+</p>
+</div>
+<p>Also, note the CumPL value of $2251.20741 and Drawdown value of -$1231.29476 are the <em>final</em> values. It does not show max profit or max drawdown. Notice the values are different from figure 6.3 and figure 6.2.</p>
+<p>Going by that alone it may seem the strategy overall is profitable. But when you realize max drawdown was near -$3,000 and max profit was up to $3,000, it doesn’t seem so promising.</p>
+<p>Again, we’ll get into all of this later. Just something to keep in mind when you start doing analysis.</p>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="basic-strategy.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="parameter-optimization.html" class="navigation navigation-next " aria-label="Next page""><i class="fa fa-angle-right"></i></a>
+
+<script src="assets/gitbook-2.6.7/js/app.js"></script>
+<script src="assets/gitbook-2.6.7/js/lunr.js"></script>
+<script src="assets/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="assets/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="assets/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="assets/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="assets/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script>
+require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"facebook": true,
+"twitter": true,
+"google": false,
+"weibo": false,
+"instapper": false,
+"vk": false,
+"all": ["facebook", "google", "twitter", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/timtrice/stock-book/edit/master/data-quality.Rmd",
+"text": "Edit This Page"
+},
+"download": null,
+"toc": {
+"collapse": "subsection"
+},
+"toolbar": {
+"position": "static"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    if (location.protocol !== "file:" && /^https?:/.test(script.src))
+      script.src  = script.src.replace(/^https?:/, '');
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>
