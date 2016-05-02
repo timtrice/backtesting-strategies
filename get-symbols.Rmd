@@ -12,21 +12,22 @@ symbols <- basic_symbols()
 
 We send a request through `getSymbols()` to download data. We can use any of the following sources:
 
-** Yahoo!
+* Yahoo!
 
-** Google
+* Google
 
-** MySQL
+* MySQL
 
-** RData
+* RData
 
-** CSV
+* CSV
 
 For data other than stocks we can use:
 
-** [FRED (Federal Reserve Economic Data) source](https://research.stlouisfed.org/fred2/);  FRED contains data such as unemployment, GDP, treasury rates and more. 
+* [FRED (Federal Reserve Economic Data) source](https://research.stlouisfed.org/fred2/);  FRED contains data such as unemployment, GDP, treasury rates and more. 
 
-** [OANDA](https://www.oanda.com/) is a subscription-service for forex and currency data. 
+* [OANDA](https://www.oanda.com/) is a subscription-service for forex and currency data. 
+
 ## Yahoo!
 
 ```{r get-symbols-yahoo-getsymbols}
@@ -45,17 +46,17 @@ The first thing you notice is the warning message. As it states, it will only ap
 #'      quantmod affect our code?
 ```
 
-** **Symbols**: one or a vector of multiple symbols. 
+* **Symbols**: one or a vector of multiple symbols. 
 
-** **src**: string, our source. In this case, Yahoo!
+* **src**: string, our source. In this case, Yahoo!
 
-** **index.class**: POSIXct. This sets the class of our xts object index. 
+* **index.class**: POSIXct. This sets the class of our xts object index. 
 
-** **from**: string, first date of data we want to retrieve
+* **from**: string, first date of data we want to retrieve
 
-** **end**: string, last date of data we want to retrieve
+* **end**: string, last date of data we want to retrieve
 
-** **adjust**: boolean, whether to adjust our data or not. Suggested to set as TRUE.
+* **adjust**: boolean, whether to adjust our data or not. Suggested to set as TRUE.
 
 `getSymbols` will load xts objects for each of the symbols we passed into our Global Environment. We can view the data as we would any other dataset.
 
