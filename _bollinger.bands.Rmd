@@ -1,0 +1,180 @@
+# Bollinger Bands
+
+```{r, message = FALSE, warnings = FALSE}
+library(quantstrat)
+library(TTR)
+```
+
+```{r}
+Sys.setenv(TZ = "UTC")
+```
+
+```{r}
+currency("USD")
+```
+
+```{r}
+stock("SPY", 
+      currency = "USD",
+      multiplier = 1)
+```
+
+## Get Symbols
+
+```{r}
+init_date <- "2009-12-31"
+
+start_date <- "2010-01-01"
+
+end_date <- "2010-12-31"
+
+init_equity <- 1e5 # $10,000
+```
+
+```{r}
+getSymbols(Symbols = "SPY", 
+           src = "yahoo", 
+           index.class = "POSIXct",
+           from = start_date, 
+           to = end_date, 
+           adjust = TRUE)
+```
+
+## Initialize Account, Portfolio and Strategy
+
+```{r}
+strat.name <- "Bollinger.Band"
+```
+
+```{r}
+rm.strat(strat.name)
+```
+
+```{r}
+initPortf(strat.name, 
+          symbols = "SPY", 
+          initDate = init_date)
+```
+
+```{r}
+initAcct(strat.name, 
+         portfolios = strat.name, 
+         initDate = init_date, 
+         initEq = init_equity)
+```
+
+```{r}
+initOrders(portfolio = strat.name, 
+           symbols = "SPY", 
+           initDate = init_date)
+```
+
+```{r}
+addPosLimit(portfolio = strat.name, 
+            symbol = "SPY", 
+            timestamp = start_date, 
+            maxpos = 200, 
+            longlevels = 2)
+```
+
+```{r}
+strategy(strat.name, store = TRUE)
+```
+
+```{r}
+strat <- getStrategy(strat.name)
+```
+
+## Indicators
+
+```{r 2-1-add-indicators}
+add.indicator(strategy = strat.name, 
+              name = "BBands", 
+              arguments = list(HLC = quote(HLC(mktdata)), 
+                               n = 20, 
+                               maType = "SMA", 
+                               sd = 2), 
+              label = "BB.20.2")
+```
+
+## Signals
+
+```{r 2-1-add-signals}
+add.signal(strat.name, 
+           name="sigCrossover", 
+           arguments = list(columns = c("Close", "up"), 
+                            relationship = "gt"),
+           label="Cl.gt.Upper.Band")
+
+add.signal(strat.name, 
+           name = "sigCrossover",
+           arguments = list(columns = c("Close", "dn"), 
+                            relationship = "lt"),
+           label = "Cl.lt.Lower.Band")
+
+add.signal(strat.name, 
+           name = "sigCrossover",
+           arguments = list(columns = c("High", "Low", "mavg"), 
+                            relationship = "op"),
+           label = "Cross.Mid")
+```
+
+## Adding Rules
+
+```{r 2-1-add-rules}
+add.rule(strategy = strat.name, 
+         name = "ruleSignal",
+         arguments  =  list(sigcol = "Cl.gt.Upper.Band",
+                          sigval = TRUE,
+                          orderqty = -100, 
+                          ordertype = "market",
+                          orderside = NULL,
+                          threshold = NULL,
+                          osFUN = osMaxPos),
+         type = "enter")
+
+add.rule(strategy = strat.name, 
+         name = "ruleSignal",
+         arguments  =  list(sigcol = "Cl.lt.Lower.Band",
+                          sigval = TRUE,
+                          orderqty =  100, 
+                          ordertype = "market",
+                          orderside = NULL,
+                          threshold = NULL,
+                          osFUN = osMaxPos),
+         type = "enter")
+
+add.rule(strategy = strat.name, 
+         name = "ruleSignal",
+         arguments = list(sigcol = "Cross.Mid",
+                          sigval = TRUE,
+                          orderqty = "all",
+                          ordertype = "market",
+                          orderside = NULL,
+                          threshold = NULL,
+                          osFUN = osMaxPos),
+         label = "exitMid",
+         type = "exit")
+```
+
+```{r 2-1-apply-strategy}
+applyStrategy(strategy = strat.name, 
+              portfolios = strat.name)
+```
+
+## Update Portfolio, Account
+
+```{r 2-1-update-portfolio}
+updatePortf(strat.name)
+updateAcct(strat.name)
+updateEndEq(strat.name)
+```
+
+## Returns
+
+```{r}
+chart.Posn(Portfolio = strat.name, 
+           Symbol = "SPY", 
+           TA = "add_BBands(n = 20, sd = 2, maType = 'SMA', on = 1)")
+```
+

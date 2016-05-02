@@ -1,0 +1,189 @@
+# Terminology {#terminology}
+
+* BTO: Buy to Open (open long positions)
+
+* BTC: Buy to close (close short positions)
+
+* SL: Stop-limit order
+
+* STO: Sell to open (open short positions)
+
+* STC: Sell to close (close long positions)
+
+* TS: Trailing-stop order
+
+# Using Quantsrat {#using-quantstrat}
+
+```{r knitr-settings, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      message = TRUE,
+                      warning = TRUE,
+                      include = TRUE,
+                      cache = FALSE,
+                      fig.align = "center")
+```
+
+In this book we use the `quantstrat` library version 0.9.1739. `quantstrat` provides the base functions we will use to build our strategies; adding indicators, signals and creating the rules of when to buy and when to sell. 
+
+`quantstrat` is for signal-based trading strategies, not time-based. However, you can create functions that add signals based on time frames and implement those functions as indicators. We'll get to that later.
+
+`quantstrat` also allows us to test a strategy on one or many symbols. The downside to using many symbols is that it can be resource-intensive. We can also test strategies with a range of parameters. Say, for example, you want to test a simple SMA strategy but want to find the best-performing SMA parameter; `quantstrat` allows for this. Again, though, it can be resource-intensive.
+
+## Settings and Variables
+
+Settings listed here will be used in all of our backtests. They are required; you will get errors if you run any of the strategies without including the below settings and variables. Some of these may change depending on the strategy which will be noted.
+
+First we use `Sys.setenv()` to set our timezone to UTC.
+
+```{r introduction-timezone}
+Sys.setenv(TZ = "UTC")
+```
+
+Next, since we'll be working with stocks in the U.S. market we need to set our `currency` object to **USD**. 
+
+```{r introduction-currency}
+currency('USD')
+```
+
+When backtesting strategies you should always include periods of market turmoil. After all, you don't want to just see how your strategy performs when the market is strong but also when it is weak. For this book we'll use the years 2008 and 2009. 
+
+* `init_date`: The date we will initialize our account and portfolio objects. This date should be the day prior to `start_date`.
+
+* `start_date`: First date of data to retrieve.
+
+* `end_date`: Last date of data to retrieve.
+
+* `init_equity`: Initial account equity.
+
+* `adjustment`: Boolean - TRUE if we should adjust the prices for dividend payouts, stock splits, etc; otherwise, FALSE.
+
+You should always work with adjusted pricing when possible to give you the truest results.
+
+```{r introduction-variables}
+init_date <- "2007-12-31"
+start_date <- "2008-01-01"
+end_date <- "2009-12-31"
+init_equity <- 1e4 # $10,000
+adjustment <- TRUE
+```
+
+## Symbols
+
+Most our strategies will use three ETF's: *IWM*, *QQQ* and *SPY*. This is only for demonstration purposes. They are loaded into `basic_symbols()`.
+
+```{r introduction-basic-symbols}
+basic_symbols <- function() {
+    symbols <- c(
+        "IWM", # iShares Russell 2000 Index ETF
+        "QQQ", # PowerShares QQQ TRust, Series 1 ETF
+        "SPY" # SPDR S&P 500 ETF Trust
+    )
+}
+```
+
+Where we may want to test strategies on a slightly broader scale we'll use `enhanced_symbols()` which adds `basic_symbols()`, *TLT* and Sector SPDR ETF's *XLB*, *XLE*, *XLF*, *XLI*, *XLK*, *XLP*, *XLU*, *XLV*, and *XLY*.
+
+```{r introduction-enhanced-symnbols}
+enhanced_symbols <- function() {
+    symbols <- c(
+        basic_symbols(), 
+        "TLT", # iShares Barclays 20+ Yr Treas. Bond ETF
+        "XLB", # Materials Select Sector SPDR ETF
+        "XLE", # Energy Select Sector SPDR ETF
+        "XLF", # Financial Select Sector SPDR ETF
+        "XLI", # Industrials Select Sector SPDR ETF
+        "XLK", # Technology  Select Sector SPDR ETF
+        "XLP", # Consumer Staples  Select Sector SPDR ETF
+        "XLU", # Utilities  Select Sector SPDR ETF
+        "XLV", # Health Care  Select Sector SPDR ETF
+        "XLY" # Consumer Discretionary  Select Sector SPDR ETF
+    )
+}
+```
+
+Lastly, we may use `global_symbols()` for better insight into a strategy. However, the purposes of this book is to show how to backtest strategies, not to find profitable strategies. 
+
+```{r introduction-global-symnbols}
+global_symbols <- function() {
+    symbols <- c(
+        enhanced_symbols(), 
+        "EFA", # iShares EAFE
+        "EPP", # iShares Pacific Ex Japan
+        "EWA", # iShares Australia
+        "EWC", # iShares Canada
+        "EWG", # iShares Germany
+        "EWH", # iShares Hong Kong
+        "EWJ", # iShares Japan
+        "EWS", # iShares Singapore
+        "EWT", # iShares Taiwan
+        "EWU", # iShares UK
+        "EWY", # iShares South Korea
+        "EWZ", # iShares Brazil
+        "EZU", # iShares MSCI EMU ETF
+        "IGE", # iShares North American Natural Resources
+        "IYR", # iShares U.S. Real Estate
+        "IYZ", # iShares U.S. Telecom
+        "LQD", # iShares Investment Grade Corporate Bonds
+        "SHY" # iShares 42372 year TBonds
+    )
+}
+```
+
+## checkBlotterUpdate() {#checkBlotterUpdate}
+
+The `checkBlotterUpdate()` function comes courtesy of [Guy Yollin](http://www.r-programming.org/papers). The purpose of this function is to check for discrepancies between the account object and portfolio object. If the function returns **FALSE** we must examine why (perhaps we didn't clear our objects before running the strategy?). 
+
+```{r checkBlotterUpdate}
+# Guy Yollin, 2014
+# http://www.r-programming.org/papers
+
+checkBlotterUpdate <- function(port.st = portfolio.st, 
+                               account.st = account.st, 
+                               verbose = TRUE) {
+    
+    ok <- TRUE
+    p <- getPortfolio(port.st)
+    a <- getAccount(account.st)
+    syms <- names(p$symbols)
+    port.tot <- sum(
+        sapply(
+            syms, 
+            FUN = function(x) eval(
+                parse(
+                    text = paste("sum(p$symbols", 
+                                 x, 
+                                 "posPL.USD$Net.Trading.PL)", 
+                                 sep = "$")))))
+    
+    port.sum.tot <- sum(p$summary$Net.Trading.PL)
+    
+    if(!isTRUE(all.equal(port.tot, port.sum.tot))) {
+        ok <- FALSE
+        if(verbose) print("portfolio P&L doesn't match sum of symbols P&L")
+    }
+    
+    initEq <- as.numeric(first(a$summary$End.Eq))
+    endEq <- as.numeric(last(a$summary$End.Eq))
+    
+    if(!isTRUE(all.equal(port.tot, endEq - initEq)) ) {
+        ok <- FALSE
+        if(verbose) print("portfolio P&L doesn't match account P&L")
+    }
+    
+    if(sum(duplicated(index(p$summary)))) {
+        ok <- FALSE
+        if(verbose)print("duplicate timestamps in portfolio summary")
+        
+    }
+    
+    if(sum(duplicated(index(a$summary)))) {
+        ok <- FALSE
+        if(verbose) print("duplicate timestamps in account summary")
+    }
+    return(ok)
+}
+```
+
+* [http://r-forge.r-project.org/projects/blotter/](http://r-forge.r-project.org/projects/blotter/)
+
+* [http://www.r-programming.org/papers](http://www.r-programming.org/papers)

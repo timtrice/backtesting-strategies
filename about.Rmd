@@ -1,0 +1,18 @@
+# About "Backtesting Strategies with R"
+
+This book is intended to *help you* do your own homework. This book is in no way, shape or form to be misconstrued as investment or trading guidance. It is for backtesting strategies only. What you do with your money on your time is your problem. There are many resources available for you to ask questions if you do not understand something. Use them.
+
+## Tim Trice
+
+My first foray into the stock market came in late 2007 and early 2008. It should go without saying this was a bad time to learn a new craft. I took a few years off before gradually working my way back into the market in 2011. I concentrate more on technical analysis. I had read many books discussing this-and-that pattern and strategy and how it worked and so forth but found in the real world things weren't always what they seemed. 
+
+In 2014 I began using my programming background to backtest strategies. Initially this was confined to downloading daily data and using Excel to test ideas. Shortly after I moved my backtesting to R and Python. 
+
+I am, by no means, a quantitative trading expert. I have never worked for a large trading firm. I trade with my own money. I do not offer advice nor will I ever. I like solving puzzles. I like challenges. My intent with this book is to help bring together the vast resources available to test ideas ad nauseam so that hopefully some of you won't make the same costly mistakes I made. If you can't simulate it, don't trade it. 
+
+## To You, the Reader
+
+The source code for this book is available [on Github](https://github.com/timtrice/stock-book). All contributors will be acknolwedged on this page. Comments are included throughout the source code on things I would like to expand on or questions I have to address later. I will attempt to list them all on the [project issues page](https://github.com/timtrice/stock-book/issues).
+
+If you don't understand something, [let me know](http://timtrice.co/contact.html). I will attempt to address it the best I can. If not, I will find the answer. 
+
