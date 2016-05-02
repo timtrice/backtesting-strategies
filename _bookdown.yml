@@ -1,5 +1,5 @@
 chapter_name: "Chapter "
-output_dir: "book"
+output_dir: "./"
 edit:
     link: https://github.com/timtrice/stock-book/edit/master/%s
     text: "Edit This Page"
