@@ -16,7 +16,6 @@ output:
         css: toc.css
 documentclass: book
 description: "Backtesting strategies with R"
-output_dir: "/"
 ---
 
 ```{r index-comments, eval = FALSE, echo = FALSE}
