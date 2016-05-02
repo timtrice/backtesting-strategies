@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Backtesting Strategies with R</title>
+  <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+  <meta name="description" content="Backtesting strategies with R">
+  <meta name="generator" content="bookdown 0.0.62 and GitBook 2.6.7">
+
+  <meta property="og:title" content="Backtesting Strategies with R" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="Backtesting strategies with R" />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Backtesting Strategies with R" />
+  
+  <meta name="twitter:description" content="Backtesting strategies with R" />
+  
+
+<meta name="author" content="Tim Trice">
+
+<meta name="date" content="2016-05-02">
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  
+  
+<link rel="prev" href="trailing-stops.html">
+<link rel="next" href="analyzing-results.html">
+
+<script src="assets/jquery-2.2.3/jquery.min.js"></script>
+<link href="assets/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="assets/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="assets/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="assets/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="assets/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+
+
+
+
+
+
+
+<script src="assets/htmlwidgets-0.6/htmlwidgets.js"></script>
+<script src="assets/datatables-binding-0.1/datatables.js"></script>
+<script src="assets/datatables-1.10.7/jquery.dataTables.min.js"></script>
+<link href="assets/datatables-default-1.10.7/dataTables.extra.css" rel="stylesheet" />
+<link href="assets/datatables-default-1.10.7/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="assets/datatables-scroller-1.10.7/dataTables.scroller.min.css" rel="stylesheet" />
+<script src="assets/datatables-scroller-1.10.7/dataTables.scroller.min.js"></script>
+<link href="assets/datatables-fixedColumns-1.10.7/dataTables.fixedColumns.min.css" rel="stylesheet" />
+<script src="assets/datatables-fixedColumns-1.10.7/dataTables.fixedColumns.min.js"></script>
+<link href="assets/nouislider-7.0.10/jquery.nouislider.min.css" rel="stylesheet" />
+<script src="assets/nouislider-7.0.10/jquery.nouislider.min.js"></script>
+<link href="assets/selectize-0.12.0/selectize.bootstrap3.css" rel="stylesheet" />
+<script src="assets/selectize-0.12.0/selectize.min.js"></script>
+
+
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+<link rel="stylesheet" href="custom_styles.css" type="text/css" />
+</head>
+
+<body>
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Introduction</a><ul>
+<li class="chapter" data-level="1.1" data-path="index.html"><a href="index.html#r-resources"><i class="fa fa-check"></i><b>1.1</b> R Resources</a></li>
+<li class="chapter" data-level="1.2" data-path="index.html"><a href="index.html#libraries"><i class="fa fa-check"></i><b>1.2</b> Libraries</a></li>
+<li class="chapter" data-level="1.3" data-path="index.html"><a href="index.html#sessioninfo"><i class="fa fa-check"></i><b>1.3</b> SessionInfo</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="terminology.html"><a href="terminology.html"><i class="fa fa-check"></i><b>2</b> Terminology</a></li>
+<li class="chapter" data-level="3" data-path="using-quantstrat.html"><a href="using-quantstrat.html"><i class="fa fa-check"></i><b>3</b> Using Quantsrat</a><ul>
+<li class="chapter" data-level="3.1" data-path="using-quantstrat.html"><a href="using-quantstrat.html#settings-and-variables"><i class="fa fa-check"></i><b>3.1</b> Settings and Variables</a></li>
+<li class="chapter" data-level="3.2" data-path="using-quantstrat.html"><a href="using-quantstrat.html#symbols"><i class="fa fa-check"></i><b>3.2</b> Symbols</a></li>
+<li class="chapter" data-level="3.3" data-path="using-quantstrat.html"><a href="using-quantstrat.html#checkBlotterUpdate"><i class="fa fa-check"></i><b>3.3</b> checkBlotterUpdate()</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="get-symbols.html"><a href="get-symbols.html"><i class="fa fa-check"></i><b>4</b> Get Symbols</a><ul>
+<li class="chapter" data-level="4.1" data-path="get-symbols.html"><a href="get-symbols.html#google"><i class="fa fa-check"></i><b>4.1</b> Google</a></li>
+<li class="chapter" data-level="4.2" data-path="get-symbols.html"><a href="get-symbols.html#mysql"><i class="fa fa-check"></i><b>4.2</b> MySQL</a></li>
+<li class="chapter" data-level="4.3" data-path="get-symbols.html"><a href="get-symbols.html#fred"><i class="fa fa-check"></i><b>4.3</b> FRED</a></li>
+<li class="chapter" data-level="4.4" data-path="get-symbols.html"><a href="get-symbols.html#oanda"><i class="fa fa-check"></i><b>4.4</b> OANDA</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="basic-strategy.html"><a href="basic-strategy.html"><i class="fa fa-check"></i><b>5</b> Basic Strategy</a><ul>
+<li class="chapter" data-level="5.1" data-path="basic-strategy.html"><a href="basic-strategy.html#strategy-setup"><i class="fa fa-check"></i><b>5.1</b> Strategy Setup</a></li>
+<li class="chapter" data-level="5.2" data-path="basic-strategy.html"><a href="basic-strategy.html#add-indicators"><i class="fa fa-check"></i><b>5.2</b> Add Indicators</a></li>
+<li class="chapter" data-level="5.3" data-path="basic-strategy.html"><a href="basic-strategy.html#add-signals"><i class="fa fa-check"></i><b>5.3</b> Add Signals</a></li>
+<li class="chapter" data-level="5.4" data-path="basic-strategy.html"><a href="basic-strategy.html#add-rules"><i class="fa fa-check"></i><b>5.4</b> Add Rules</a></li>
+<li class="chapter" data-level="5.5" data-path="basic-strategy.html"><a href="basic-strategy.html#apply-strategy"><i class="fa fa-check"></i><b>5.5</b> Apply Strategy</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="data-quality.html"><a href="data-quality.html"><i class="fa fa-check"></i><b>6</b> Data Quality</a><ul>
+<li class="chapter" data-level="6.1" data-path="data-quality.html"><a href="data-quality.html#yahoo-vs.google"><i class="fa fa-check"></i><b>6.1</b> Yahoo! vs. Google</a></li>
+<li class="chapter" data-level="6.2" data-path="data-quality.html"><a href="data-quality.html#examining-trades"><i class="fa fa-check"></i><b>6.2</b> Examining Trades</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="parameter-optimization.html"><a href="parameter-optimization.html"><i class="fa fa-check"></i><b>7</b> Parameter Optimization</a><ul>
+<li class="chapter" data-level="7.1" data-path="parameter-optimization.html"><a href="parameter-optimization.html#add-distribution"><i class="fa fa-check"></i><b>7.1</b> Add Distribution</a></li>
+<li class="chapter" data-level="7.2" data-path="parameter-optimization.html"><a href="parameter-optimization.html#add-distribution-constraint"><i class="fa fa-check"></i><b>7.2</b> Add Distribution Constraint</a></li>
+<li class="chapter" data-level="7.3" data-path="parameter-optimization.html"><a href="parameter-optimization.html#running-parallel"><i class="fa fa-check"></i><b>7.3</b> Running Parallel</a></li>
+<li class="chapter" data-level="7.4" data-path="parameter-optimization.html"><a href="parameter-optimization.html#apply-paramset"><i class="fa fa-check"></i><b>7.4</b> Apply Paramset</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="stop-loss.html"><a href="stop-loss.html"><i class="fa fa-check"></i><b>8</b> Stop-Loss Orders</a><ul>
+<li class="chapter" data-level="8.1" data-path="stop-loss.html"><a href="stop-loss.html#add-indicators-1"><i class="fa fa-check"></i><b>8.1</b> Add Indicators</a></li>
+<li class="chapter" data-level="8.2" data-path="stop-loss.html"><a href="stop-loss.html#add-signals-1"><i class="fa fa-check"></i><b>8.2</b> Add Signals</a></li>
+<li class="chapter" data-level="8.3" data-path="stop-loss.html"><a href="stop-loss.html#add-rules-1"><i class="fa fa-check"></i><b>8.3</b> Add Rules</a></li>
+<li class="chapter" data-level="8.4" data-path="stop-loss.html"><a href="stop-loss.html#add-position-limit"><i class="fa fa-check"></i><b>8.4</b> Add Position Limit</a></li>
+<li class="chapter" data-level="8.5" data-path="stop-loss.html"><a href="stop-loss.html#enable-rules"><i class="fa fa-check"></i><b>8.5</b> Enable Rules</a></li>
+<li class="chapter" data-level="8.6" data-path="stop-loss.html"><a href="stop-loss.html#apply-strategy-1"><i class="fa fa-check"></i><b>8.6</b> Apply Strategy</a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="stop-loss-optimization.html"><a href="stop-loss-optimization.html"><i class="fa fa-check"></i><b>9</b> Stop Loss Optimization</a><ul>
+<li class="chapter" data-level="9.1" data-path="stop-loss-optimization.html"><a href="stop-loss-optimization.html#add-indicators-2"><i class="fa fa-check"></i><b>9.1</b> Add Indicators</a></li>
+<li class="chapter" data-level="9.2" data-path="stop-loss-optimization.html"><a href="stop-loss-optimization.html#add-signals-2"><i class="fa fa-check"></i><b>9.2</b> Add Signals</a></li>
+<li class="chapter" data-level="9.3" data-path="stop-loss-optimization.html"><a href="stop-loss-optimization.html#add-rules-2"><i class="fa fa-check"></i><b>9.3</b> Add Rules</a></li>
+<li class="chapter" data-level="9.4" data-path="stop-loss-optimization.html"><a href="stop-loss-optimization.html#add-position-limit-1"><i class="fa fa-check"></i><b>9.4</b> Add Position Limit</a></li>
+<li class="chapter" data-level="9.5" data-path="stop-loss-optimization.html"><a href="stop-loss-optimization.html#add-distribution-1"><i class="fa fa-check"></i><b>9.5</b> Add Distribution</a></li>
+<li class="chapter" data-level="9.6" data-path="stop-loss-optimization.html"><a href="stop-loss-optimization.html#add-distribution-constraint-1"><i class="fa fa-check"></i><b>9.6</b> Add Distribution Constraint</a></li>
+<li class="chapter" data-level="9.7" data-path="stop-loss-optimization.html"><a href="stop-loss-optimization.html#enable-rules-1"><i class="fa fa-check"></i><b>9.7</b> Enable Rules</a></li>
+<li class="chapter" data-level="9.8" data-path="stop-loss-optimization.html"><a href="stop-loss-optimization.html#apply-paramset-1"><i class="fa fa-check"></i><b>9.8</b> Apply Paramset</a></li>
+</ul></li>
+<li class="chapter" data-level="10" data-path="trailing-stops.html"><a href="trailing-stops.html"><i class="fa fa-check"></i><b>10</b> Trailing Stops</a><ul>
+<li class="chapter" data-level="10.1" data-path="trailing-stops.html"><a href="trailing-stops.html#osfixeddollar"><i class="fa fa-check"></i><b>10.1</b> osFixedDollar</a></li>
+<li class="chapter" data-level="10.2" data-path="trailing-stops.html"><a href="trailing-stops.html#add-indicators-3"><i class="fa fa-check"></i><b>10.2</b> Add Indicators</a></li>
+<li class="chapter" data-level="10.3" data-path="trailing-stops.html"><a href="trailing-stops.html#add-signals-3"><i class="fa fa-check"></i><b>10.3</b> Add Signals</a></li>
+<li class="chapter" data-level="10.4" data-path="trailing-stops.html"><a href="trailing-stops.html#add-rules-3"><i class="fa fa-check"></i><b>10.4</b> Add Rules</a></li>
+<li class="chapter" data-level="10.5" data-path="trailing-stops.html"><a href="trailing-stops.html#enable-rules-2"><i class="fa fa-check"></i><b>10.5</b> Enable Rules</a></li>
+<li class="chapter" data-level="10.6" data-path="trailing-stops.html"><a href="trailing-stops.html#save-strategy"><i class="fa fa-check"></i><b>10.6</b> Save Strategy</a></li>
+</ul></li>
+<li class="chapter" data-level="11" data-path="obtaining-resources.html"><a href="obtaining-resources.html"><i class="fa fa-check"></i><b>11</b> Obtaining Resources</a><ul>
+<li class="chapter" data-level="11.1" data-path="obtaining-resources.html"><a href="obtaining-resources.html#amazon-web-services"><i class="fa fa-check"></i><b>11.1</b> Amazon Web Services</a></li>
+<li class="chapter" data-level="11.2" data-path="obtaining-resources.html"><a href="obtaining-resources.html#getting-started"><i class="fa fa-check"></i><b>11.2</b> Getting Started</a><ul>
+<li class="chapter" data-level="11.2.1" data-path="obtaining-resources.html"><a href="obtaining-resources.html#installing-quantstrat"><i class="fa fa-check"></i><b>11.2.1</b> Installing Quantstrat</a></li>
+</ul></li>
+<li class="chapter" data-level="11.3" data-path="obtaining-resources.html"><a href="obtaining-resources.html#testing-resources"><i class="fa fa-check"></i><b>11.3</b> Testing Resources</a></li>
+<li class="chapter" data-level="11.4" data-path="obtaining-resources.html"><a href="obtaining-resources.html#changing-instances"><i class="fa fa-check"></i><b>11.4</b> Changing Instances</a></li>
+<li class="chapter" data-level="11.5" data-path="obtaining-resources.html"><a href="obtaining-resources.html#stop-the-server"><i class="fa fa-check"></i><b>11.5</b> Stop the Server</a></li>
+<li class="chapter" data-level="11.6" data-path="obtaining-resources.html"><a href="obtaining-resources.html#reading-resources"><i class="fa fa-check"></i><b>11.6</b> Reading Resources</a></li>
+</ul></li>
+<li class="chapter" data-level="12" data-path="analyzing-results.html"><a href="analyzing-results.html"><i class="fa fa-check"></i><b>12</b> Analyzing Results</a><ul>
+<li class="chapter" data-level="12.1" data-path="analyzing-results.html"><a href="analyzing-results.html#apply-strategy-2"><i class="fa fa-check"></i><b>12.1</b> Apply Strategy</a></li>
+<li class="chapter" data-level="12.2" data-path="analyzing-results.html"><a href="analyzing-results.html#chart-positions"><i class="fa fa-check"></i><b>12.2</b> Chart Positions</a></li>
+<li class="chapter" data-level="12.3" data-path="analyzing-results.html"><a href="analyzing-results.html#trade-statistics"><i class="fa fa-check"></i><b>12.3</b> Trade Statistics</a><ul>
+<li class="chapter" data-level="12.3.1" data-path="analyzing-results.html"><a href="analyzing-results.html#trade-related"><i class="fa fa-check"></i><b>12.3.1</b> Trade Related</a></li>
+<li class="chapter" data-level="12.3.2" data-path="analyzing-results.html"><a href="analyzing-results.html#profit-related"><i class="fa fa-check"></i><b>12.3.2</b> Profit Related</a></li>
+<li class="chapter" data-level="12.3.3" data-path="analyzing-results.html"><a href="analyzing-results.html#averages"><i class="fa fa-check"></i><b>12.3.3</b> Averages</a></li>
+<li class="chapter" data-level="12.3.4" data-path="analyzing-results.html"><a href="analyzing-results.html#performance-summary"><i class="fa fa-check"></i><b>12.3.4</b> Performance Summary</a></li>
+<li class="chapter" data-level="12.3.5" data-path="analyzing-results.html"><a href="analyzing-results.html#per-trade-statistics"><i class="fa fa-check"></i><b>12.3.5</b> Per Trade Statistics</a></li>
+<li class="chapter" data-level="12.3.6" data-path="analyzing-results.html"><a href="analyzing-results.html#performance-statistics"><i class="fa fa-check"></i><b>12.3.6</b> Performance Statistics</a></li>
+<li class="chapter" data-level="12.3.7" data-path="analyzing-results.html"><a href="analyzing-results.html#risk-statistics"><i class="fa fa-check"></i><b>12.3.7</b> Risk Statistics</a></li>
+<li class="chapter" data-level="12.3.8" data-path="analyzing-results.html"><a href="analyzing-results.html#buy-and-hold-performance"><i class="fa fa-check"></i><b>12.3.8</b> Buy and Hold Performance</a></li>
+<li class="chapter" data-level="12.3.9" data-path="analyzing-results.html"><a href="analyzing-results.html#strategy-vs.market"><i class="fa fa-check"></i><b>12.3.9</b> Strategy vs. Market</a></li>
+<li class="chapter" data-level="12.3.10" data-path="analyzing-results.html"><a href="analyzing-results.html#riskreturn-scatterplot"><i class="fa fa-check"></i><b>12.3.10</b> Risk/Return Scatterplot</a></li>
+<li class="chapter" data-level="12.3.11" data-path="analyzing-results.html"><a href="analyzing-results.html#relative-performance"><i class="fa fa-check"></i><b>12.3.11</b> Relative Performance</a></li>
+<li class="chapter" data-level="12.3.12" data-path="analyzing-results.html"><a href="analyzing-results.html#portfolio-summary"><i class="fa fa-check"></i><b>12.3.12</b> Portfolio Summary</a></li>
+<li class="chapter" data-level="12.3.13" data-path="analyzing-results.html"><a href="analyzing-results.html#order-book"><i class="fa fa-check"></i><b>12.3.13</b> Order Book</a></li>
+<li class="chapter" data-level="12.3.14" data-path="analyzing-results.html"><a href="analyzing-results.html#maximum-adverse-excursion"><i class="fa fa-check"></i><b>12.3.14</b> Maximum Adverse Excursion</a></li>
+<li class="chapter" data-level="12.3.15" data-path="analyzing-results.html"><a href="analyzing-results.html#maximum-favorable-excursion"><i class="fa fa-check"></i><b>12.3.15</b> Maximum Favorable Excursion</a></li>
+</ul></li>
+<li class="chapter" data-level="12.4" data-path="analyzing-results.html"><a href="analyzing-results.html#account-summary"><i class="fa fa-check"></i><b>12.4</b> Account Summary</a><ul>
+<li class="chapter" data-level="12.4.1" data-path="analyzing-results.html"><a href="analyzing-results.html#equity-curve"><i class="fa fa-check"></i><b>12.4.1</b> Equity Curve</a></li>
+<li class="chapter" data-level="12.4.2" data-path="analyzing-results.html"><a href="analyzing-results.html#account-performance-summary"><i class="fa fa-check"></i><b>12.4.2</b> Account Performance Summary</a></li>
+<li class="chapter" data-level="12.4.3" data-path="analyzing-results.html"><a href="analyzing-results.html#cumulative-returns"><i class="fa fa-check"></i><b>12.4.3</b> Cumulative Returns</a></li>
+<li class="chapter" data-level="12.4.4" data-path="analyzing-results.html"><a href="analyzing-results.html#distribution-analysis"><i class="fa fa-check"></i><b>12.4.4</b> Distribution Analysis</a></li>
+<li class="chapter" data-level="12.4.5" data-path="analyzing-results.html"><a href="analyzing-results.html#annualized-returns"><i class="fa fa-check"></i><b>12.4.5</b> Annualized Returns</a></li>
+<li class="chapter" data-level="12.4.6" data-path="analyzing-results.html"><a href="analyzing-results.html#performance-scatter-plot"><i class="fa fa-check"></i><b>12.4.6</b> Performance Scatter Plot</a></li>
+<li class="chapter" data-level="12.4.7" data-path="analyzing-results.html"><a href="analyzing-results.html#notional-costs"><i class="fa fa-check"></i><b>12.4.7</b> Notional Costs</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="13" data-path="walk-forward-analysis.html"><a href="walk-forward-analysis.html"><i class="fa fa-check"></i><b>13</b> Walk Forward Analysis</a></li>
+<li class="chapter" data-level="14" data-path="monte-carlo-analysis.html"><a href="monte-carlo-analysis.html"><i class="fa fa-check"></i><b>14</b> Monte Carlo Analysis</a></li>
+<li class="chapter" data-level="15" data-path="warnings-and-errors.html"><a href="warnings-and-errors.html"><i class="fa fa-check"></i><b>15</b> Warnings and Errors</a><ul>
+<li class="chapter" data-level="15.1" data-path="warnings-and-errors.html"><a href="warnings-and-errors.html#must-use-auto.assigntrue-for-multiple-symbols-requests"><i class="fa fa-check"></i><b>15.1</b> Must use auto.assign=TRUE for multiple Symbols requests</a></li>
+<li class="chapter" data-level="15.2" data-path="warnings-and-errors.html"><a href="warnings-and-errors.html#missing-in-call-to-function-add.distribution"><i class="fa fa-check"></i><b>15.2</b> Missing in call to function add.distribution</a></li>
+</ul></li>
+<li class="chapter" data-level="16" data-path="about-backtesting-strategies-with-r.html"><a href="about-backtesting-strategies-with-r.html"><i class="fa fa-check"></i><b>16</b> About “Backtesting Strategies with R”</a><ul>
+<li class="chapter" data-level="16.1" data-path="about-backtesting-strategies-with-r.html"><a href="about-backtesting-strategies-with-r.html#tim-trice"><i class="fa fa-check"></i><b>16.1</b> Tim Trice</a></li>
+<li class="chapter" data-level="16.2" data-path="about-backtesting-strategies-with-r.html"><a href="about-backtesting-strategies-with-r.html#to-you-the-reader"><i class="fa fa-check"></i><b>16.2</b> To You, the Reader</a></li>
+</ul></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Backtesting Strategies with R</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="obtaining-resources" class="section level1">
+<h1><span class="header-section-number">Chapter 11</span> Obtaining Resources</h1>
+<p>Some of you may not have the resources needed to run complex strategies. Some of you may have dual or quad core processors (even more) but still find some strategies taking a bit of time to run. Nothing is worse than running a strategy for ten or thirty minutes or even longer to find something’s not right. This can get more irritated if you’re running on a large number of symbols.</p>
+<div id="amazon-web-services" class="section level2">
+<h2><span class="header-section-number">11.1</span> Amazon Web Services</h2>
+<p>Amazon Web Services is a cloud-computing service that allows us to use resources that may not normally be available to us. They’re are literally dozens of services available depending on your needs.</p>
+<p>The one we will focus on here is EC2 or <a href="https://aws.amazon.com/ec2/?sc_channel=PS&amp;sc_campaign=acquisition_US&amp;sc_publisher=google&amp;sc_medium=ec2_b&amp;sc_content=ec2_e&amp;sc_detail=amazon%20web%20service%20ec2&amp;sc_category=ec2&amp;sc_segment=73821516762&amp;sc_matchtype=e&amp;sc_country=US&amp;s_kwcid=AL!4422!3!73821516762!e!!g!!amazon%20web%20service%20ec2&amp;ef_id=Vx5b0AAABUmn0WIi:20160427010350:s">Elastic Compute Cloud</a>. EC2 offers virtual server space in the Linux and Windows platforms. With EC2 we can get a very minimal setup for as little as $0.006 per hour.</p>
+<p>You do not need to have this service running 24 hours a day. One of the huge benefits of the service is we only need to fire it up when we’re ready to do something. It takes just a few minutes to boot up. We only pay for uptime.</p>
+<p>Another advantage is we can use multiple instances. We can have one server testing a script or running an analysis and work on the same project on another server.</p>
+<p>In addition, if you’ve never used Amazon Web Services before you are likely available for a one year free trial. There may be some restrictions. With the free trial you can get the t2.micro service which gives 1GB of memory and a 1 core 2.40Ghz processor, leave it running 24 hours a day, 7 days a week for a full year and not pay a dime. This is plenty to get the basic foundation layed.</p>
+<div class="cost">
+<p>
+When you see this block it means we are going to perform some operations that may incur a charge depending on your AWS account. It is up to you to know the associated costs for your account.
+</p>
+</div>
+<p>We’re also going to take advantage of a tremendous service offered by <a href="http://www.louisaslett.com/">Louis Aslett</a>. Louis has taken the time to create and maintain <a href="http://www.louisaslett.com/RStudio_AMI/">dozens of Linux images</a> set up with RStudio. Don’t worry if you’re not familiar with Linux. After the initial setup you’ll rarely need it.</p>
+</div>
+<div id="getting-started" class="section level2">
+<h2><span class="header-section-number">11.2</span> Getting Started</h2>
+<p>If you have not used AWS before <a href="https://aws-portal.amazon.com/gp/aws/developer/registration/index.html">go create an account</a>. Registration takes just a few minutes.</p>
+<p>When finished, we’ll go to <a href="http://www.louisaslett.com/RStudio_AMI/">Louis Aslett’s website</a> to grab an image.</p>
+<div class="figure">
+<img src="https://s3.amazonaws.com/backtesting-strategies-r/rstudio-ami.png" alt="" />
+
+</div>
+<p>You’ll see the RStudio/R images listed down the left side and server locations across the header. You want to find the server location closest to you but for our purposes it shouldn’t matter much. The latest release as of this writing that is RStudio 0.99.491 with R 3.2.3 (This book is written in RStudio 0.99.893 using R 3.2.3).</p>
+<p>Click on the corresponding ami hyperlink. This will take you to choose an instance type. If you’re eligible for the free-tier service you’ll see the green font accent beneath the t2.micro service.</p>
+<div class="figure">
+<img src="https://s3.amazonaws.com/backtesting-strategies-r/aws-instance-type.png" alt="" />
+
+</div>
+<p>Click “Next: Configure Instance Details” and keep clicking Next until you get to <strong>Step 6: Configure Security Group</strong>. By default port 22 is open for SSH from any IP address. You can close this if you like. However, I like to install my R libraries to the root user through SSH. I’ll demonstrate this later. If you choose to keep SSH change <strong>Source</strong> to Custom IP and your IP address range should pop up in the text field to the right.</p>
+<p>You also want to click “Add Rule” to open port 80. Select the “Custom TCP Rule” under <strong>Type</strong> and change it to HTTP. This will add the value 80 under <strong>Port Range</strong>. As with SSH change <strong>Source</strong> to Custom IP and again your IP address range will automatically fill in.</p>
+<p>You can also create your own <strong>Security group name</strong> or leave the default. I used <em>rstudio-0-99-491</em>.</p>
+<div class="figure">
+<img src="https://s3.amazonaws.com/backtesting-strategies-r/aws-security-group.png" alt="" />
+
+</div>
+<div class="warning">
+<p>
+Do not leave <strong>Source</strong> open to “Anywhere” as this will allow anyone to potentially <em>attempt</em> to access your virtual server. This may seem harmless but if you’re working solo there’s no sense having it all open unless you’re comfortable with Linux security. If you’re working in groups, use Github.
+</p>
+</div>
+<p>Next, click “Review and Launch”. This will take you to a summary page reiterating your selections. If all looks good click “Launch”.</p>
+<div class="figure">
+<img src="https://s3.amazonaws.com/backtesting-strategies-r/aws-key-pair.png" alt="" />
+
+</div>
+<p>If you left SSH open you’re not quite done yet. You’ll see a pop-up window asking you to create or use an existing key pair. A private key is used to SSH into your remote server. Select “Create a new key pair” from the drop down menu and give a Key pair name; I named mine after my security group for simplicity. Click “Download Key Pair” and save the pem file to a safe location. When you’ve saved the pem file click “Launch Instances”.</p>
+<div class="info">
+<p>
+If you’re service is running but you are unable to log in via SSH or HTTP it is likely because your IP address has been changed by your DNS provider. See <a href="http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-network-security.html#adding-security-group-rule">Adding Rules to a Security Group</a> on changing the IP rules.
+</p>
+</div>
+<div class="cost">
+<p>
+Once you launch an instance you are now on the billing clock. If you were eligible for the free-tier and selected the t2.micro instance you should not be incurring charges during your trial.
+</p>
+</div>
+<p>While you are waiting, if you are on a Windows system and left SSH enabled please take a moment to review <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/putty.html">Connecting to Your Linux Instance from Windows Using PuTTY</a>. You will need to convert the pem file to a ppk file in order to log in.</p>
+<p>As we wait you’ll notice <strong>Instance State</strong> is listed as “running” but <strong>Status Checks</strong> shows as “initializing”. Once <strong>Status Checks</strong> displays “2/2 checks…” you are now ready to log in to your new server.</p>
+<div class="figure">
+<img src="https://s3.amazonaws.com/backtesting-strategies-r/aws-ec2-dashboard.png" alt="" />
+
+</div>
+<p>Take a look at the frame in the bottom of your browser. You’ll see your instance ID followed by Public DNS. Copy the Public DNS and paste it into a new browser window or tab and hit enter. You should now be greeted by a RStudio login page. Congratulations!</p>
+<p>We’re not done yet. The default username and login to the AMI is <strong>rstudio</strong> for both Username and Password. So go ahead and log into your system. When RStudio loads you will see a commented script in the editor. Read over it carefully and follow the instructions particularly in regards to changing your password. I would suggest getting a new password from <a href="http://passwordsgenerator.net/">Secure Password Generator</a>. The defaults should suffice. After running <code>passwd()</code> you should get a confirmation message:</p>
+<blockquote>
+<p>(current) UNIX password: Enter new UNIX password: Retype new UNIX password: passwd: password updated successfully</p>
+</blockquote>
+<p>You are now set up to use RStudio as you have been.</p>
+<div id="installing-quantstrat" class="section level3">
+<h3><span class="header-section-number">11.2.1</span> Installing Quantstrat</h3>
+<p>If you attempt to install <code>quantstrat</code> from the RStudio package window or from Cran you will get an error that it is not available for R 3.2.3. You can install it from R-Forge.</p>
+<pre><code>install.packages(&quot;quantstrat&quot;, repos=&quot;http://R-Forge.R-project.org&quot;)</code></pre>
+<p>This will install the latest version, 0.9.1739, the same as used in this book along with the additional libraries needed.</p>
+</div>
+</div>
+<div id="testing-resources" class="section level2">
+<h2><span class="header-section-number">11.3</span> Testing Resources</h2>
+<p>We’ll use a minor variation of the MACD demo in <code>quantstrat</code> to test some speeds. The strategy will buy when our signal line crosses over 0 and sell when it crosses under 0.</p>
+<p>We’ll use a range of 1:20 for <code>fastMA</code> and 30:80 for <code>slowMA</code>. The original demo called for a random sample of 10 but we’ll remove that to test all 1,020 iterations.</p>
+<p>We will execute the strategy on one stock, <strong>AAPL</strong>, from 2007 to Jun. 1, 2014.</p>
+<p>These tests are performed using Ubuntu 14.04.3 LTS, x86 64 bit.</p>
+<p>The unevaluated code is as follows:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">start_t &lt;-<span class="st"> </span><span class="kw">Sys.time</span>()
+
+<span class="kw">library</span>(quantstrat)
+<span class="co"># For Linux</span>
+<span class="kw">library</span>(doMC)
+<span class="kw">registerDoMC</span>(<span class="dt">cores =</span> parallel::<span class="kw">detectCores</span>())
+
+stock.str &lt;-<span class="st"> &quot;AAPL&quot;</span> <span class="co"># what are we trying it on</span>
+
+<span class="co">#MA parameters for MACD</span>
+fastMA &lt;-<span class="st"> </span><span class="dv">12</span> 
+slowMA &lt;-<span class="st"> </span><span class="dv">26</span> 
+signalMA &lt;-<span class="st"> </span><span class="dv">9</span>
+maType &lt;-<span class="st"> &quot;EMA&quot;</span>
+.FastMA &lt;-<span class="st"> </span>(<span class="dv">1</span>:<span class="dv">20</span>)
+.SlowMA &lt;-<span class="st"> </span>(<span class="dv">30</span>:<span class="dv">80</span>)
+
+<span class="kw">currency</span>(<span class="st">&quot;USD&quot;</span>)
+<span class="kw">stock</span>(stock.str, <span class="dt">currency =</span> <span class="st">&quot;USD&quot;</span>, <span class="dt">multiplier =</span> <span class="dv">1</span>)
+
+start_date &lt;-<span class="st"> &quot;2006-12-31&quot;</span>
+initEq &lt;-<span class="st"> </span><span class="dv">1000000</span>
+portfolio.st &lt;-<span class="st"> &quot;macd&quot;</span>
+account.st &lt;-<span class="st"> &quot;macd&quot;</span>
+
+<span class="kw">rm.strat</span>(portfolio.st)
+<span class="kw">rm.strat</span>(account.st)
+
+<span class="kw">initPortf</span>(portfolio.st, <span class="dt">symbols =</span> stock.str)
+<span class="kw">initAcct</span>(account.st, <span class="dt">portfolios =</span> portfolio.st)
+<span class="kw">initOrders</span>(<span class="dt">portfolio =</span> portfolio.st)
+
+strat.st &lt;-<span class="st"> </span>portfolio.st
+<span class="co"># define the strategy</span>
+<span class="kw">strategy</span>(strat.st, <span class="dt">store =</span> <span class="ot">TRUE</span>)
+
+<span class="co">#one indicator</span>
+<span class="kw">add.indicator</span>(strat.st, 
+              <span class="dt">name =</span> <span class="st">&quot;MACD&quot;</span>, 
+              <span class="dt">arguments =</span> <span class="kw">list</span>(<span class="dt">x =</span> <span class="kw">quote</span>(<span class="kw">Cl</span>(mktdata)),
+                               <span class="dt">nFast =</span> fastMA, 
+                               <span class="dt">nSlow =</span> slowMA),
+              <span class="dt">label =</span> <span class="st">&quot;_&quot;</span>)
+
+<span class="co">#two signals</span>
+<span class="kw">add.signal</span>(strat.st,
+           <span class="dt">name =</span> <span class="st">&quot;sigThreshold&quot;</span>,
+           <span class="dt">arguments =</span> <span class="kw">list</span>(<span class="dt">column =</span> <span class="st">&quot;signal._&quot;</span>,
+                            <span class="dt">relationship =</span> <span class="st">&quot;gt&quot;</span>,
+                            <span class="dt">threshold =</span> <span class="dv">0</span>,
+                            <span class="dt">cross =</span> <span class="ot">TRUE</span>),
+           <span class="dt">label =</span> <span class="st">&quot;signal.gt.zero&quot;</span>)
+
+<span class="kw">add.signal</span>(strat.st,
+           <span class="dt">name =</span> <span class="st">&quot;sigThreshold&quot;</span>,
+           <span class="dt">arguments =</span> <span class="kw">list</span>(<span class="dt">column =</span> <span class="st">&quot;signal._&quot;</span>,
+                            <span class="dt">relationship =</span> <span class="st">&quot;lt&quot;</span>,
+                            <span class="dt">threshold =</span> <span class="dv">0</span>,
+                            <span class="dt">cross =</span> <span class="ot">TRUE</span>),
+           <span class="dt">label =</span> <span class="st">&quot;signal.lt.zero&quot;</span>)
+
+<span class="co"># add rules</span>
+
+<span class="co"># entry</span>
+<span class="kw">add.rule</span>(strat.st,
+         <span class="dt">name =</span> <span class="st">&quot;ruleSignal&quot;</span>, 
+         <span class="dt">arguments =</span> <span class="kw">list</span>(<span class="dt">sigcol =</span> <span class="st">&quot;signal.gt.zero&quot;</span>,
+                          <span class="dt">sigval =</span> <span class="ot">TRUE</span>, 
+                          <span class="dt">orderqty =</span> <span class="dv">100</span>, 
+                          <span class="dt">ordertype =</span> <span class="st">&quot;market&quot;</span>, 
+                          <span class="dt">orderside =</span> <span class="st">&quot;long&quot;</span>, 
+                          <span class="dt">threshold =</span> <span class="ot">NULL</span>),
+         <span class="dt">type =</span> <span class="st">&quot;enter&quot;</span>,
+         <span class="dt">label =</span> <span class="st">&quot;enter&quot;</span>,
+         <span class="dt">storefun =</span> <span class="ot">FALSE</span>)
+
+<span class="co"># exit</span>
+<span class="kw">add.rule</span>(strat.st,
+         <span class="dt">name =</span> <span class="st">&quot;ruleSignal&quot;</span>, 
+         <span class="dt">arguments =</span> <span class="kw">list</span>(<span class="dt">sigcol =</span> <span class="st">&quot;signal.lt.zero&quot;</span>,
+                          <span class="dt">sigval =</span> <span class="ot">TRUE</span>, 
+                          <span class="dt">orderqty =</span> <span class="st">&quot;all&quot;</span>, 
+                          <span class="dt">ordertype =</span> <span class="st">&quot;market&quot;</span>, 
+                          <span class="dt">orderside =</span> <span class="st">&quot;long&quot;</span>, 
+                          <span class="dt">threshold =</span> <span class="ot">NULL</span>,
+                          <span class="dt">orderset =</span> <span class="st">&quot;exit2&quot;</span>),
+         <span class="dt">type =</span> <span class="st">&quot;exit&quot;</span>,
+         <span class="dt">label =</span> <span class="st">&quot;exit&quot;</span>)
+
+### MA paramset
+
+<span class="kw">add.distribution</span>(strat.st,
+                 <span class="dt">paramset.label =</span> <span class="st">&quot;MA&quot;</span>,
+                 <span class="dt">component.type =</span> <span class="st">&quot;indicator&quot;</span>,
+                 <span class="dt">component.label =</span> <span class="st">&quot;_&quot;</span>, <span class="co">#this is the label given to the indicator in the strat</span>
+                 <span class="dt">variable =</span> <span class="kw">list</span>(<span class="dt">n =</span> .FastMA),
+                 <span class="dt">label =</span> <span class="st">&quot;nFAST&quot;</span>)
+
+<span class="kw">add.distribution</span>(strat.st,
+                 <span class="dt">paramset.label =</span> <span class="st">&quot;MA&quot;</span>,
+                 <span class="dt">component.type =</span> <span class="st">&quot;indicator&quot;</span>,
+                 <span class="dt">component.label =</span> <span class="st">&quot;_&quot;</span>, <span class="co">#this is the label given to the indicator in the strat</span>
+                 <span class="dt">variable =</span> <span class="kw">list</span>(<span class="dt">n =</span> .SlowMA),
+                 <span class="dt">label =</span> <span class="st">&quot;nSLOW&quot;</span>)
+
+<span class="kw">add.distribution.constraint</span>(strat.st,
+                            <span class="dt">paramset.label =</span> <span class="st">&quot;MA&quot;</span>,
+                            <span class="dt">distribution.label.1 =</span> <span class="st">&quot;nFAST&quot;</span>,
+                            <span class="dt">distribution.label.2 =</span> <span class="st">&quot;nSLOW&quot;</span>,
+                            <span class="dt">operator =</span> <span class="st">&quot;&lt;&quot;</span>,
+                            <span class="dt">label =</span> <span class="st">&quot;MA&quot;</span>)
+
+
+<span class="kw">getSymbols</span>(stock.str, <span class="dt">from =</span> start_date, <span class="dt">to =</span> <span class="st">&quot;2014-06-01&quot;</span>)
+
+results &lt;-<span class="st"> </span><span class="kw">apply.paramset</span>(strat.st, 
+                          <span class="dt">paramset.label =</span> <span class="st">&quot;MA&quot;</span>, 
+                          <span class="dt">portfolio.st =</span> portfolio.st, 
+                          <span class="dt">account.st =</span> account.st, 
+                          <span class="dt">nsamples =</span> <span class="dv">0</span>, 
+                          <span class="dt">verbose =</span> <span class="ot">TRUE</span>)
+
+<span class="kw">updatePortf</span>(<span class="dt">Portfolio =</span> portfolio.st,<span class="dt">Dates =</span> <span class="kw">paste</span>(<span class="st">&quot;::&quot;</span>,<span class="kw">as.Date</span>(<span class="kw">Sys.time</span>()),<span class="dt">sep =</span> <span class="st">&quot;&quot;</span>))
+end_t &lt;-<span class="st"> </span><span class="kw">Sys.time</span>()
+<span class="kw">print</span>(end_t-start_t)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">servers &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;t2.micro&quot;</span>, <span class="st">&quot;t2.medium&quot;</span>, <span class="st">&quot;m4.xlarge&quot;</span>, <span class="st">&quot;m4.2xlarge&quot;</span>, <span class="st">&quot;m4.4xlarge&quot;</span>)
+aws &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="st">&quot;Server&quot;</span> =<span class="st"> </span><span class="kw">factor</span>(servers, <span class="dt">levels =</span> servers), 
+                  <span class="st">&quot;Processor&quot;</span> =<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Intel Xeon E5-2676 v3, 2.40 GHz&quot;</span>, 
+                                  <span class="st">&quot;Intel Xeon E5-2670 v2, 2.50 GHz&quot;</span>, 
+                                  <span class="st">&quot;Intel Xeon E5-2676 v3, 2.40Ghz&quot;</span>, 
+                                  <span class="st">&quot;Intel Xeon E5-2676 v3, 2.40Ghz&quot;</span>, 
+                                  <span class="st">&quot;Intel Xeon E5-2676 v3, 2.40Ghz&quot;</span>),
+                  <span class="st">&quot;VirtualCores&quot;</span> =<span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">8</span>, <span class="dv">16</span>), 
+                  <span class="st">&quot;Memory&quot;</span> =<span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">4</span>, <span class="dv">16</span>, <span class="dv">32</span>, <span class="dv">64</span>), 
+                  <span class="st">&quot;Seconds&quot;</span> =<span class="st"> </span><span class="kw">c</span>(<span class="fl">749.841</span>, <span class="fl">293.6499</span>, <span class="fl">118.1366</span>, <span class="fl">62.24196</span>, <span class="fl">34.68986</span>), 
+                  <span class="st">&quot;Price&quot;</span> =<span class="st"> </span><span class="kw">c</span>(<span class="fl">0.013</span>, <span class="fl">0.052</span>, <span class="fl">0.239</span>, <span class="fl">0.479</span>, <span class="fl">0.958</span>))
+
+<span class="co"># knitr::kable(aws, caption = &quot;Test Results for AWS&quot;, booktabs = TRUE)</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">aws %&gt;%<span class="st"> </span>
+<span class="st">    </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(<span class="dt">x =</span> Server, <span class="dt">y =</span> Seconds, <span class="dt">fill =</span> Server)) +<span class="st"> </span>
+<span class="st">    </span><span class="kw">geom_bar</span>(<span class="dt">stat =</span> <span class="st">&quot;identity&quot;</span>) +<span class="st"> </span>
+<span class="st">    </span><span class="kw">theme_bw</span>() +<span class="st"> </span>
+<span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Execution Time per Server&quot;</span>)</code></pre></div>
+<p><img src="_main_files/figure-html/obtaining-resources-aws-execute-1.png" title="" alt="" style="display: block; margin: auto;" /></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">aws_ppe &lt;-<span class="st"> </span>aws %&gt;%<span class="st"> </span>
+<span class="st">    </span><span class="kw">mutate</span>(<span class="dt">ppe =</span> (Price/<span class="dv">60</span>) *<span class="st"> </span>Seconds)
+
+aws_ppe %&gt;%<span class="st"> </span>
+<span class="st">    </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(<span class="dt">x =</span> Server, <span class="dt">y =</span> ppe, <span class="dt">fill =</span> Server)) +<span class="st"> </span>
+<span class="st">    </span><span class="kw">geom_bar</span>(<span class="dt">stat =</span> <span class="st">&quot;identity&quot;</span>) +<span class="st"> </span>
+<span class="st">    </span><span class="kw">theme_bw</span>() +<span class="st"> </span>
+<span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Cost per Second of Execution (ppe)&quot;</span>, <span class="dt">y =</span> <span class="st">&quot;Cost (USD)&quot;</span>)</code></pre></div>
+<p><img src="_main_files/figure-html/obtaining-resources-aws-ppe-1.png" title="" alt="" style="display: block; margin: auto;" /></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># knitr::kable(aws_ppe, caption = &quot;Cost per Second of Execution (ppe)&quot;, </span>
+<span class="co">#              y = &quot;Cost (USD)&quot;, booktabs = TRUE)</span></code></pre></div>
+<p>We can get a general idea of costs by comparing execution times versus the cost of the server. Keep in mind this may vary by script and using other servers available.</p>
+<p>Obviously we’re paying a premium for speed though all things considered there isn’t much of a difference going from m4.xlarge to m4.4xlarge. Prices are not prorated for hourly usage so if you’re going to pay a premium for the faster servers it may not be a bad idea to have several backtests ready to run.</p>
+</div>
+<div id="changing-instances" class="section level2">
+<h2><span class="header-section-number">11.4</span> Changing Instances</h2>
+<div class="cost">
+<p>
+Regardless if you’re free-tier eligible or not, using any server instance beyond the t2.micro will incur charges. See <a href="https://aws.amazon.com/ec2/pricing/">Amazon EC2 Pricing</a> for more details.
+</p>
+</div>
+<p>To change your instance types go to your EC2 Dashboard then click the Instances link under Instances. Check the box next to your instance then click on the Actions dropdown.</p>
+<div class="figure">
+<img src="https://s3.amazonaws.com/backtesting-strategies-r/aws-change-instance.png" alt="" />
+
+</div>
+<p>If your instance is already running stop it by selecting Instance State &gt; Stop.</p>
+<p>With the instance stopped under <strong>Instance State</strong> go back to Actions and select Instance Settings &gt; Change Instance Types. Then select your instance from the select field and Apply.</p>
+<p>You can restart the instance right away by going back to Actions &gt; Instance State &gt; Start. It will take a few minutes but will be ready to go when <strong>Status Checks</strong> reads “2/2 checks…”.</p>
+</div>
+<div id="stop-the-server" class="section level2">
+<h2><span class="header-section-number">11.5</span> Stop the Server</h2>
+<div class="warning">
+<p>
+Do not terminate the server else you will lose all of your data. There is no charge for stopping an instance and it only takes minutes to fire it back up when you’re ready to work.
+</p>
+</div>
+<p>When you finish your workload be sure to log off RStudio. You can stop the instance by going to Actions &gt; Instance State &gt; Stop. All of your data will be saved for the next time you are ready to work.</p>
+<p>When you stop/start or restart a server you will receive a new Public DNS. If you have stored your original Public DNS as a bookmark or in PuTTY, be sure to update it to the new DNS assigned by AWS when the server is started. You can use <a href="http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html">Elastic IPs</a> to keep a consistent IP address. However, this is only free if you leave your instance running 24/7.</p>
+<div class="cost">
+<p>
+After you have stopped the server you are no longer incurring charges regardless of the instance type. However, you may want to downgrade the Instance Type to be safe the next time you start the server.
+</p>
+</div>
+</div>
+<div id="reading-resources" class="section level2">
+<h2><span class="header-section-number">11.6</span> Reading Resources</h2>
+<p>If you are interested in further utilizing AWS for your backtesting I recommend the book <a href="http://amzn.to/1Uhki5A">Amazon Web Services in Action</a> (affiliate link) by Andreas and Michael Wittig. The book details virtual hosting and storage services as well as proper security. If you intend to develop complex strategies in R but lack the resources you may find AWS can be a great option.</p>
+<p>If you’re going to use Ubuntu I would also recommend <a href="http://amzn.to/1NTBxmR">The Official Ubuntu Server Book</a> (affiliate link) by Kyle Rankin and Benjamin Mako Hill.</p>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="trailing-stops.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="analyzing-results.html" class="navigation navigation-next " aria-label="Next page""><i class="fa fa-angle-right"></i></a>
+
+<script src="assets/gitbook-2.6.7/js/app.js"></script>
+<script src="assets/gitbook-2.6.7/js/lunr.js"></script>
+<script src="assets/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="assets/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="assets/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="assets/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="assets/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script>
+require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"facebook": true,
+"twitter": true,
+"google": false,
+"weibo": false,
+"instapper": false,
+"vk": false,
+"all": ["facebook", "google", "twitter", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/timtrice/stock-book/edit/master/obtaining-resources.Rmd",
+"text": "Edit This Page"
+},
+"download": null,
+"toc": {
+"collapse": "subsection"
+},
+"toolbar": {
+"position": "static"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    if (location.protocol !== "file:" && /^https?:/.test(script.src))
+      script.src  = script.src.replace(/^https?:/, '');
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>
