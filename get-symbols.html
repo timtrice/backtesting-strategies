@@ -141,10 +141,11 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="3.3" data-path="using-quantstrat.html"><a href="using-quantstrat.html#checkBlotterUpdate"><i class="fa fa-check"></i><b>3.3</b> checkBlotterUpdate()</a></li>
 </ul></li>
 <li class="chapter" data-level="4" data-path="get-symbols.html"><a href="get-symbols.html"><i class="fa fa-check"></i><b>4</b> Get Symbols</a><ul>
-<li class="chapter" data-level="4.1" data-path="get-symbols.html"><a href="get-symbols.html#google"><i class="fa fa-check"></i><b>4.1</b> Google</a></li>
-<li class="chapter" data-level="4.2" data-path="get-symbols.html"><a href="get-symbols.html#mysql"><i class="fa fa-check"></i><b>4.2</b> MySQL</a></li>
-<li class="chapter" data-level="4.3" data-path="get-symbols.html"><a href="get-symbols.html#fred"><i class="fa fa-check"></i><b>4.3</b> FRED</a></li>
-<li class="chapter" data-level="4.4" data-path="get-symbols.html"><a href="get-symbols.html#oanda"><i class="fa fa-check"></i><b>4.4</b> OANDA</a></li>
+<li class="chapter" data-level="4.1" data-path="get-symbols.html"><a href="get-symbols.html#yahoo"><i class="fa fa-check"></i><b>4.1</b> Yahoo!</a></li>
+<li class="chapter" data-level="4.2" data-path="get-symbols.html"><a href="get-symbols.html#google"><i class="fa fa-check"></i><b>4.2</b> Google</a></li>
+<li class="chapter" data-level="4.3" data-path="get-symbols.html"><a href="get-symbols.html#mysql"><i class="fa fa-check"></i><b>4.3</b> MySQL</a></li>
+<li class="chapter" data-level="4.4" data-path="get-symbols.html"><a href="get-symbols.html#fred"><i class="fa fa-check"></i><b>4.4</b> FRED</a></li>
+<li class="chapter" data-level="4.5" data-path="get-symbols.html"><a href="get-symbols.html#oanda"><i class="fa fa-check"></i><b>4.5</b> OANDA</a></li>
 </ul></li>
 <li class="chapter" data-level="5" data-path="basic-strategy.html"><a href="basic-strategy.html"><i class="fa fa-check"></i><b>5</b> Basic Strategy</a><ul>
 <li class="chapter" data-level="5.1" data-path="basic-strategy.html"><a href="basic-strategy.html#strategy-setup"><i class="fa fa-check"></i><b>5.1</b> Strategy Setup</a></li>
@@ -264,14 +265,20 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">symbols &lt;-<span class="st"> </span><span class="kw">basic_symbols</span>()</code></pre></div>
 <p><code>getSymbols()</code> is part of the <code>quantmod</code> package which was automatically loaded when we loaded <code>quantstrat</code>. It should have been installed automatically when you install <code>quantstrat</code>.</p>
 <p>We send a request through <code>getSymbols()</code> to download data. We can use any of the following sources:</p>
-<p>** Yahoo!</p>
-<p>** Google</p>
-<p>** MySQL</p>
-<p>** RData</p>
-<p>** CSV</p>
+<ul>
+<li><p>Yahoo!</p></li>
+<li><p>Google</p></li>
+<li><p>MySQL</p></li>
+<li><p>RData</p></li>
+<li><p>CSV</p></li>
+</ul>
 <p>For data other than stocks we can use:</p>
-<p>** <a href="https://research.stlouisfed.org/fred2/">FRED (Federal Reserve Economic Data) source</a>; FRED contains data such as unemployment, GDP, treasury rates and more.</p>
-<p>** <a href="https://www.oanda.com/">OANDA</a> is a subscription-service for forex and currency data. ## Yahoo!</p>
+<ul>
+<li><p><a href="https://research.stlouisfed.org/fred2/">FRED (Federal Reserve Economic Data) source</a>; FRED contains data such as unemployment, GDP, treasury rates and more.</p></li>
+<li><p><a href="https://www.oanda.com/">OANDA</a> is a subscription-service for forex and currency data.</p></li>
+</ul>
+<div id="yahoo" class="section level2">
+<h2><span class="header-section-number">4.1</span> Yahoo!</h2>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">getSymbols</span>(<span class="dt">Symbols =</span> symbols, 
            <span class="dt">src =</span> <span class="st">&quot;yahoo&quot;</span>, 
            <span class="dt">index.class =</span> <span class="st">&quot;POSIXct&quot;</span>,
@@ -289,12 +296,14 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 ##  options(&quot;getSymbols.warning4.0&quot;=FALSE). See ?getSymbols for more details.</code></pre>
 <pre><code>## [1] &quot;IWM&quot; &quot;QQQ&quot; &quot;SPY&quot;</code></pre>
 <p>The first thing you notice is the warning message. As it states, it will only appear the first time you run <code>getSymbols()</code> in a new session.</p>
-<p>** <strong>Symbols</strong>: one or a vector of multiple symbols.</p>
-<p>** <strong>src</strong>: string, our source. In this case, Yahoo!</p>
-<p>** <strong>index.class</strong>: POSIXct. This sets the class of our xts object index.</p>
-<p>** <strong>from</strong>: string, first date of data we want to retrieve</p>
-<p>** <strong>end</strong>: string, last date of data we want to retrieve</p>
-<p>** <strong>adjust</strong>: boolean, whether to adjust our data or not. Suggested to set as TRUE.</p>
+<ul>
+<li><p><strong>Symbols</strong>: one or a vector of multiple symbols.</p></li>
+<li><p><strong>src</strong>: string, our source. In this case, Yahoo!</p></li>
+<li><p><strong>index.class</strong>: POSIXct. This sets the class of our xts object index.</p></li>
+<li><p><strong>from</strong>: string, first date of data we want to retrieve</p></li>
+<li><p><strong>end</strong>: string, last date of data we want to retrieve</p></li>
+<li><p><strong>adjust</strong>: boolean, whether to adjust our data or not. Suggested to set as TRUE.</p></li>
+</ul>
 <p><code>getSymbols</code> will load xts objects for each of the symbols we passed into our Global Environment. We can view the data as we would any other dataset.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(IWM)</code></pre></div>
 <pre><code>##            IWM.Open IWM.High  IWM.Low IWM.Close IWM.Volume IWM.Adjusted
@@ -329,8 +338,9 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 ##  Max.   :72.80   Max.   :74.20   Max.   :355117000   Max.   :67.73</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Clear symbols</span>
 <span class="kw">rm</span>(<span class="dt">list=</span><span class="kw">basic_symbols</span>())</code></pre></div>
+</div>
 <div id="google" class="section level2">
-<h2><span class="header-section-number">4.1</span> Google</h2>
+<h2><span class="header-section-number">4.2</span> Google</h2>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">getSymbols</span>(<span class="dt">Symbols =</span> symbols, 
            <span class="dt">src =</span> <span class="st">&quot;google&quot;</span>, 
            <span class="dt">index.class =</span> <span class="st">&quot;POSIXct&quot;</span>,
@@ -376,7 +386,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="kw">rm</span>(<span class="dt">list=</span><span class="kw">basic_symbols</span>())</code></pre></div>
 </div>
 <div id="mysql" class="section level2">
-<h2><span class="header-section-number">4.2</span> MySQL</h2>
+<h2><span class="header-section-number">4.3</span> MySQL</h2>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">getSymbols</span>(<span class="dt">Symbols =</span> symbols, 
            <span class="dt">src =</span> <span class="st">&quot;MySQL&quot;</span>, 
            <span class="dt">dbname =</span> db, 
@@ -428,7 +438,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="kw">rm</span>(<span class="dt">list=</span><span class="kw">basic_symbols</span>())</code></pre></div>
 </div>
 <div id="fred" class="section level2">
-<h2><span class="header-section-number">4.3</span> FRED</h2>
+<h2><span class="header-section-number">4.4</span> FRED</h2>
 <p>For this example we’ll bail on the <code>symbols</code> we have been using prior. FRED contains over 11,000 econonomic datasets at no cost.</p>
 <p>Let’s look at the 10-Year Treasury Rate:</p>
 <blockquote>
@@ -445,7 +455,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">rm</span>(DGS10)</code></pre></div>
 </div>
 <div id="oanda" class="section level2">
-<h2><span class="header-section-number">4.4</span> OANDA</h2>
+<h2><span class="header-section-number">4.5</span> OANDA</h2>
 <p>Contributions needed.</p>
 
 </div>
