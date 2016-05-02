@@ -1,4 +1,6 @@
 bookdown::gitbook:
     css: custom_styles.css
+    includes:
+        in_footer: ga.html
 bookdown::pdf_book:
     keep_tex: yes
