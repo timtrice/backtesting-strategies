@@ -1,0 +1,105 @@
+--- 
+title: "Backtesting Strategies with R"
+author: "Tim Trice"
+date: "`r Sys.Date()`"
+knit: "bookdown::render_book"
+output: 
+    bookdown::gitbook:
+        lib_dir: assets
+        config: 
+            toolbar:
+                position: static
+        highlight: default
+    bookdown::pdf_book:
+        keep_tex: yes
+    bookdown::html_chapters:
+        css: toc.css
+documentclass: book
+description: "Backtesting strategies with R"
+---
+
+```{r index-comments, eval = FALSE, echo = FALSE}
+# Click "Knit" button above to view sample
+# Live serve:
+#       bookdown:::serve_book()
+# Produce gitbook output: 
+#       bookdown:;render_book("index.Rmd", "bookdown::gitbook")
+# To produce PDF output: 
+#       bookdown::render_book("index.Rmd", "bookdown::pdf_book")
+# Preview a chapter:
+#       bookdown::preview_chapter("file.Rmd")
+```
+
+# Introduction
+
+This book is designed to not only produce statistics on many of the most common technical patterns in the stock market, but to show actual trades in such scenarios. 
+
+* Test a strategy; reject if results are not promising
+
+* Apply a range of parameters to strategies for optimization
+
+* Attempt to kill any strategy that looks promising. 
+
+Let me explain that last one a bit. Just because you may find a strategy that seems to outperform the market, have good profit and low drawdown this doesn't mean you've found a strategy to put to work. On the contrary, you must work to disprove it. Nothing is worse than putting a non-profitable strategy to work because it wasn't rigurously tested. We'll address that later.
+
+## R Resources
+
+This book assumes you have at least a basic working knowledge of the R platform. If you are new to R or need a refresher, the following site should be beneficial:
+
+* [Advanced R](http://adv-r.had.co.nz/)
+
+In addition, the packages used in this book can be found under the [TradeAnalytics projected on R-Forge](http://r-forge.r-project.org/projects/blotter/). You will find forums and source code that have helped inspire this book.
+
+I also recommend you read [Guy Yollin's presentations](http://www.r-programming.org/papers) on backtesting as well as the [Using Quantstrat](https://docs.google.com/presentation/d/1fGzDc-LFfCQJKHHzaonspuX1_TTm1EB5hlvCEDsz7zw/pub?slide=id.p) presentation by Jan Humme and Brian Peterson. 
+
+This book is not intended to replace any of the existing resources on backtesting strategies in R. Rather, the intent is to enhance and streamline those resources. If something is not addressed in this book read the presentations above. 
+
+Also, this book is open-source. Anyone is welcome to contribute. You can find the source code available [on my Github account](https://github.com/timtrice/stock-book).
+
+## Libraries
+
+The only required library needed to run backtesting strategies is `quantstrat`. `quantstrat` will load all additionally required libraries.
+
+* quantstrat 0.9.1739
+
+This version of `quantstrat` includes the following packages, among others: 
+
+* blotter 0.9.1741
+
+* quantmod 0.4-5
+
+* TTR 0.23-1
+
+With these libraries we will have all we need to fully-test strategies and measure performance. See 1.3 SessionInfo for more details.
+
+```{r index-mandatory-libraries}
+library(quantstrat)
+```
+
+Additional libraries we may use for analysis or book presentation:
+
+* ggplot2 2.0.0
+
+* dplyr 0.4.3
+
+* tidyr 0.4.1
+
+```{r index-optional-libraries}
+library(data.table)
+library(dplyr)
+library(DT)
+library(ggplot2)
+library(htmltools)
+library(htmlwidgets)
+library(knitr)
+library(lattice)
+library(pander)
+library(tidyr)
+library(webshot)
+```
+
+## SessionInfo
+
+```{r session-info}
+sessionInfo()
+```

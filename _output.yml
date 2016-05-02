@@ -1,0 +1,4 @@
+bookdown::gitbook:
+    css: custom_styles.css
+bookdown::pdf_book:
+    keep_tex: yes

@@ -1,0 +1,299 @@
+# Basic Strategy {#basic-strategy}
+
+Let's kick things off with a variation of the Luxor trading strategy. This strategy uses two SMA indicators: SMA(10) and SMA(30). 
+
+If the SMA(10) indicator is greater than or equal to the SMA(30) indicator we will submit a stoplimit long order to open and close any short positions that may be open. If the SMA(10) is less than the SMA(30) we will submit a stoplimit short order to open and close any open long positions. 
+
+```{block type = "strategy"}
+If SMA(10) >= SMA(30):
+
+    BTC short, BTO long
+
+Else if SMA(10) < SMA(30): 
+
+    STC long, STO short
+```
+
+**Note:** Remember we have already set some variables earlier in the book. If you copy and paste the code below by itself you will get errors. There will be complete tutorials listed later in the book.
+
+## Strategy Setup
+
+We load our symbols into `symbols`. 
+
+    ```{r basic-strategy-symbols}
+print(basic_symbols())
+symbols <- basic_symbols()
+```
+
+```{r basic-strategy-getsymbols}
+getSymbols(Symbols = symbols, 
+           src = "yahoo", 
+           index.class = "POSIXct",
+           from = start_date, 
+           to = end_date, 
+           adjust = adjustment)
+```
+
+After we've loaded our symbols we use `FinancialInstrument::stock()` to define the meta-data for our symbols. In this case we're defining the currency in USD (US Dollars) with a multiplier of 1. Multiplier is applied to price. This will vary depending on the financial instrument you are working on but for stocks it should always be 1. 
+
+```{r basic-strategy-stock}
+stock(symbols, 
+      currency = "USD", 
+      multiplier = 1)
+```
+
+Next we'll assign proper names for our portfolio, account and strategy objects. These can be any name you want and should be based on how you intend to log the data later on.
+
+```{r basic-strategy-create-objects}
+portfolio.st <- "Port.Luxor"
+account.st <- "Acct.Luxor"
+strategy.st <- "Strat.Luxor"
+```
+
+We remove any residuals from previous runs by clearing out the portfolio and account values. At this point for what we have done so far this is unnecessary. However, it's a good habit to include this with all of your scripts as data stored in memory can affect results or generate errors.
+
+```{r basic-strategy-rm-strat}
+rm.strat(portfolio.st)
+rm.strat(account.st)
+```
+
+Now we initialize our portfolio, account and orders. We will also store our strategy to save for later. 
+
+```{r basic-strategy-init-portf}
+initPortf(name = portfolio.st,
+          symbols = symbols,
+          initDate = init_date)
+```
+
+```{r basic-strategy-init-acct}
+initAcct(name = account.st,
+         portfolios = portfolio.st,
+         initDate = init_date,
+         initEq = init_equity)
+```
+
+```{r basic-strategy-init-orders}
+initOrders(portfolio = portfolio.st,
+           symbols = symbols,
+           initDate = init_date)
+```
+
+```{r basic-strategy-strategy}
+strategy(strategy.st, store = TRUE)
+```
+
+## Add Indicators
+
+Indicators are functions used to measure a variable. A SMA is just an average of the previous n prices; typically closing price. So SMA(10) is just an average of the last 10 closing prices. 
+
+This is where the `TTR` library comes in; short for Technical Trading Rules. `SMA()` is a function of `TTR` as are many other indicators. If you want MACD, RSI, Bollinger Bands, etc., you will use the `TTR` library.
+
+```{r basic-strategy-add-indicators}
+add.indicator(strategy = strategy.st,
+              name = "SMA",
+              arguments = list(x = quote(Cl(mktdata)), 
+                               n = 10),
+              label = "nFast")
+
+add.indicator(strategy = strategy.st, 
+              name = "SMA", 
+              arguments = list(x = quote(Cl(mktdata)), 
+                               n = 30), 
+              label = "nSlow")
+```
+
+`add.indicator` is a function of `quantstrat` and adds our indicators to our strategy object. For now we'll use the following parameters:
+
+* `strategy`: As we stored our strategy name in the `strategy.st` variable all we need to do is pass that variable. Otherwise we would provide a string. Use variables when this will become redundant as we move along.
+
+* `name`: Indicator function; for this example *SMA*. We only pass the name of the function as a character string. Parameters for the function are passed into the `arguments` parameter...
+
+* `arguments`: If we look at `?SMA` we see required parameters are `x` and `n` with the default `n` being 10. `x` is the price object. In our example we are using closing prices.
+
+* `label`: Label of the variable that will be added to our dataset. This must be unique for each indicator we add.
+
+Let's pause for a moment and examine *arguments*. Notice we're passing a series of functions to `x`. If you wanted to access the `Close` variable of the `IWM` dataset you would normally do so by calling `IWM$Close` or `IWM[,4]`. Here we're accessing a `mktdata` data object
+
+`mktdata` is a special dataset created for each symbol that will store all of our indicators and signals. When the strategy is ran you will see the `mktdata` object in your environment. It will only exist for the last symbol the strategy executed. 
+
+The `add.indicator()` function (along with `add.signal` and `add.rules` which we'll discuss momentarily) is not evaluated until we run our strategy. All it does is add our specs to the strategy object. When we run our strategy the `mktdata` object is created for each symbol iteration where our data will be added.
+
+`Cl` is actually short-hand for Close as you may have guessed. In fact, we have several short-hand functions for our variables:
+
+* `Op()`: Open
+
+* `Hi()`: High
+
+* `Lo()`: Low
+
+* `Cl()`: Close
+
+* `Vo()`: Volume
+
+* `Ad()`: Adjusted
+
+* `OpCl()`: Open and Close (n x 2 dataset)
+
+* `HLC()`: High, Low and Close (n x 3 dataset)
+
+See the help for any of those symbols above for a more detailed listing.
+
+`quote()` is a R function that simply wraps the supplied parameter in quotes. 
+
+So we've added two indicators to our `mktdata` object, `nFast` (SMA(10)) and `nSlow` (SMA(30)). Let's now add signals.
+
+## Add Signals
+
+Signals are a value given when conditions are met by our indicators. For example, in this strategy we want a signal whenever `nFast` is greater than or equal to `nSlow`. We also want another signal where `nFast` is less than `nSlow`. We'll name these signals `long` and `short`, respectively. 
+
+```{r basic-strategy-add-signals}
+add.signal(strategy = strategy.st,
+           name="sigCrossover",
+           arguments = list(columns = c("nFast", "nSlow"),
+                            relationship = "gte"),
+           label = "long")
+
+add.signal(strategy = strategy.st,
+           name="sigCrossover",
+           arguments = list(columns = c("nFast", "nSlow"),
+                            relationship = "lt"),
+           label = "short")
+```
+
+Again, we're passing *strategy.st* to the `strategy` parameter. `name` takes a function just as it did in `add.indicator`. Here we'll use some built-in `quantstrat` functions. Let's take a quick look at what's available:
+
+* `sigComparison`: boolean, compare two variables by relationship
+    + *gt* greater than
+    + *lt* less than
+    + *eq* equal to
+    + *gte* greater than or equal to
+    + *lte* less than or equal to
+
+* `sigCrossover`: boolean, TRUE when one signal crosses another. Uses the same relationships as `sigComparison`
+
+* `sigFormula`: apply a formula to multiple variables.
+
+* `sigPeak`: identify local minima or maxima of an indicator
+
+* `sigThreshold`: boolean, when an indicator crosses a value. Uses relationships as identified above.
+
+* `sigTimestamp`: generates a signal based on a timestamp.
+
+We'll attempt to use each of these signals throughout the book when possible.
+
+## Add Rules
+
+We've now constructed our `nFast` and `nSlow` indicators and generated signals based on those indicators. Now we have to add rules for those signals.
+
+`add.rules` will determine the positions we take depending on our signals, what type of order we'll place and how many shares we will buy. 
+
+Whenever our `long` variable (`sigcol`) is TRUE (`sigval`) we want to place a stoplimit order (`ordertype`). Our preference is at the High (`prefer`) plus `threshold`. We want to buy 100 shares (`orderqty`). A new variable `EnterLONG` will be added to `mktdata`. When we enter (`type`) a position `EnterLONG` will be TRUE, otherwise FALSE. This order will not `replace` any other open orders.
+
+```{r basic-strategy-add-rules-enterlong}
+add.rule(strategy = strategy.st,
+         name = "ruleSignal",
+         arguments = list(sigcol = "long",
+                          sigval = TRUE,
+                          orderqty = 100,
+                          ordertype = "stoplimit",
+                          orderside = "long", 
+                          threshold = 0.0005,
+                          prefer = "High", 
+                          TxnFees = -10, 
+                          replace = FALSE),
+         type = "enter",
+         label = "EnterLONG")
+```
+
+If our `short` variable (`sigcol`) is TRUE (`sigval`) we will place another stoplimit order (`ordertype`) with a preference on the Low (`prefer`). We will sell 100 shares (`orderqty`). This order will not replace any open orders (`replace`). 
+
+```{r basic-strategy-add-rules-entershort}
+add.rule(strategy.st,
+         name = "ruleSignal",
+         arguments = list(sigcol = "short",
+                          sigval = TRUE,
+                          orderqty = -100,
+                          ordertype = "stoplimit",
+                          threshold = -0.005, 
+                          orderside = "short", 
+                          replace = FALSE, 
+                          TxnFees = -10, 
+                          prefer = "Low"),
+         type = "enter",
+         label = "EnterSHORT")
+```
+
+We now have rules set up to enter positions based on our signals. However, we do not have rules to exit open positions. We'll create those now.
+
+Our next rule, `Exit2SHORT`, is a simple market order to exit (`type`) when `short` is TRUE (`sigcol`, `sigval`). This closes out all long positions (`orderside`, `orderqty`). This order will replace (`replace`) any open orders.
+
+```{r basic-strategy-add-rules-exit2short}
+add.rule(strategy.st, 
+         name = "ruleSignal", 
+         arguments = list(sigcol = "short", 
+                          sigval = TRUE, 
+                          orderside = "long", 
+                          ordertype = "market", 
+                          orderqty = "all", 
+                          TxnFees = -10, 
+                          replace = TRUE), 
+         type = "exit", 
+         label = "Exit2SHORT")
+```
+
+Lastly, we close out any short positions (`orderside`) when `long` is TRUE (`sigcol`, `sigval`). We will exit (`type`) at market price (`ordertype`) all open positions (`orderqty`). This order will replace any open orders we have (`replace`). 
+
+```{r basic-strategy-add-rules-exit2long}
+add.rule(strategy.st, 
+         name = "ruleSignal", 
+         arguments = list(sigcol = "long", 
+                          sigval = TRUE, 
+                          orderside = "short", 
+                          ordertype = "market", 
+                          orderqty = "all", 
+                          TxnFees = -10, 
+                          replace = TRUE), 
+         type = "exit", 
+         label = "Exit2LONG")
+```
+
+`TxnFees` are transaction fees associated with an order. This can be any value you choose but should accurately reflect the fees charged by your selected broker. In addition, we only show them here on exits. Some brokers charge fees on entry positions as well. `TxnFees` can be added to any rule set.
+
+If you're not sure what fees your selected broker charges - what's wrong with you? Go find out now. Some retail brokers (TD Ameritrade, ETrade) will charge under $10 per position on unlimited shares; some such as Interactive Brokers or TradeStation will charge even less depending on the number of shares. $10 is a good starting point.
+
+## Apply Strategy
+
+Now we get to the fun part! Do or die. Here we'll find out if we built our strategy correctly or if we have any errors in our code. Cross your fingers. Let's go!
+
+```{r basic-strategy-apply-strategy}
+cwd <- getwd()
+setwd("./_data/")
+results_file <- paste("results", strategy.st, "RData", sep = ".")
+if( file.exists(results_file) ) {
+    load(results_file)
+} else {
+    results <- applyStrategy(strategy.st, portfolios = portfolio.st)
+    updatePortf(portfolio.st)
+    updateAcct(account.st)
+    updateEndEq(account.st)
+    if(checkBlotterUpdate(portfolio.st, account.st, verbose = TRUE)) {
+        save(list = "results", file = results_file)
+        save.strategy(strategy.st)
+    }
+}
+setwd(cwd)
+```
+
+Awesome! We know that at least our code is good.
+
+`applyStrategy()` is the function we will run when we have a straight strategy. What I mean by that is a strategy that doesn't test different parameters. We'll get to that type of testing later. 
+
+You can see it's a pretty simple call; we just pass our `strategy.st` variable as the first parameter and our portfolio as the second parameter. There is no need to get into additional parameters at the moment.
+
+We won't show the results of any more `applyStrategy` runs to save space. Just know that if you get trade output you should be good.
+
+Next we update our portfolio and account objects. We do this with the `updatePortf()`, `updateAcct()` and `updateEndEq()` functions. `updatePortf` calculates the P&L for each symbol in `symbols`. `updateAcct` calculcates the equity from the portfolio data. And `updateEndEq` updates the ending equity for the account. They must be called in order. 
+
+We also use the `checkBlotterUpdate()` mentioned in \@ref(checkBlotterUpdate). We're looking for a TRUE value to be returned. Anything FALSE will need to be researched. (If you forgot to clear our your portfolio or strategy with the `rm.strat()` call mentioned earlier this can result in a FALSE value). 
+
+If `checkBlotterUpdate` returns true we save the results and our strategy (`save.strategy`) as a RData file into our _data directory. We'll use them for analysis later.

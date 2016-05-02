@@ -1,0 +1,162 @@
+# Parameter Optimization {#parameter-optimization}
+
+One of the important aspects of backtesting is being able to test out various parameters. After all, what if you're Luxor strategy doesn't do well with 10/30 SMA indicators but does spectacular with 17/28 SMA indicators?
+
+`quantstrat` helps us do this by adding distributions to our parameters. We can create a range of SMA values for our `nFast` and `nSlow` variables. We then examine the results to find the combination that gives us the best results.
+
+We'll assign the range for each of our SMA's to two new variables: `.fastSMA` and `.slowSMA`. Both are just simple integer vectors. You can make them as narrow or wide as you want. However, this is an intensive process. The wider your parameters, the longer it will run. I'll address this later.
+
+We also introduce `.nsamples`. `.nsamples` will be our value for the input parameter `nsamples` in `apply.paramset()`. This tells `quantstrat` that of the x-number of combinations of `.fastSMA` and `.slowSMA` to test to only take a random sample of those combinations. By default `apply.paramset(nsamples = 0)` which means all combinations will be tested. This can be fine provided you have the computational resources to do so - it can be a very intensive process (we'll deal with resources later).
+
+```{r parameter-optimization-strategy-vars}
+.fastSMA <- (1:30)
+.slowSMA <- (20:80)
+.nsamples <- 5
+```
+
+```{r parameter-optimization-create-objects}
+portfolio.st <- "Port.Luxor.MA.Opt"
+account.st <- "Acct.Luxor.MA.Opt"
+strategy.st <- "Strat.Luxor.MA.Opt"
+
+rm.strat(portfolio.st)
+rm.strat(account.st)
+
+initPortf(name = portfolio.st,
+          symbols = symbols,
+          initDate = init_date)
+
+initAcct(name = account.st,
+         portfolios = portfolio.st,
+         initDate = init_date,
+         initEq = init_equity)
+
+initOrders(portfolio = portfolio.st,
+           symbols = symbols,
+           initDate = init_date)
+
+strategy(strategy.st, store = TRUE)
+```
+
+Next we'll go through and re-initiate our portfolio and account objects as we did prior.
+
+```{r parameter-optimization-rm-strat}
+rm.strat(portfolio.st)
+rm.strat(account.st)
+```
+
+```{r parameter-optimization-init-portf}
+initPortf(name = portfolio.st,
+          symbols = symbols,
+          initDate = init_date)
+```
+
+```{r parameter-optimization-init-acct}
+initAcct(name = account.st,
+         portfolios = portfolio.st,
+         initDate = init_date)
+```
+
+```{r parameter-optimization-init-orders}
+initOrders(portfolio = portfolio.st,
+           initDate = init_date)
+```
+
+## Add Distribution
+
+We already saved our indicators, signals and rules - `strategy.st` - and loaded the strategy; we do not need to rewrite that code. 
+
+We use `add.distribution` to distribute our range of values across the two indicators. Again, our first parameter the name of our strategy `strategy.st`. 
+
+* `paramset.label`: name of the function to which the parameter range will be applied; in this case `TTR:SMA()`.
+
+* `component.type`: indicator
+
+* `component.label`: label of the indicator when we added it (`nFast` and `nSlow`)
+
+* `variable`: the parameter of `SMA()` to which our integer vectors (`.fastSMA` and `.slowSMA`) will be applied; `n`.
+
+* `label`: unique identifier for the distribution.
+
+This ties our distribution parameters to our indicators. When we run the strategy, each possible value for `.fastSMA` will be applied to `nFAST` and `.slowSMA` to `nSLOW`. 
+
+```{r parameter-optimization-add-distribution}
+add.distribution(strategy.st,
+                 paramset.label = "SMA",
+                 component.type = "indicator",
+                 component.label = "nFast",
+                 variable = list(n = .fastSMA),
+                 label = "nFAST")
+
+add.distribution(strategy.st,
+                 paramset.label = "SMA",
+                 component.type = "indicator",
+                 component.label = "nSlow",
+                 variable = list(n = .slowSMA),
+                 label = "nSLOW")
+```
+
+## Add Distribution Constraint
+
+What we do not want is to abandon our initial rules which were to buy only when SMA(10) was greater than or equal to SMA(30), otherwise short. In other words, go long when our faster SMA is greater than or equal to our slower SMA and go short when the faster SMA was less than the slower SMA.
+
+We keep this in check by using `add.distribution.constraint`. We pass in the `paramset.label` as we did in `add.distribution`. We assign `nFAST` to `distribution.label.1` and `nSLOW` to `distribution.label.2`. 
+
+Our operator will be one of `c("<", ">", "<=", ">=", "=")`. Here, we're issuing a constraint to always keep `nFAST` less than `nSLOW`. 
+
+We'll name this constraint `SMA.Con` by applying it to the `label` parameter.
+
+```{r parameter-optimization-add-distribution-constraint}
+add.distribution.constraint(strategy.st,
+                            paramset.label = "SMA",
+                            distribution.label.1 = "nFAST",
+                            distribution.label.2 = "nSLOW",
+                            operator = "<",
+                            label = "SMA.Constraint")
+```
+
+## Running Parallel
+
+`quantstrat` includes the `foreach` library for purposes such as this. `foreach` allows us to execute our strategy in parallel on multicore processors which can save some time. 
+
+On my current setup it is using one virtual core which doesn't help much for large tasks such as this. However, if you are running on a system with more than one core processor you can use the follinwg if/else statement courtesy of [Guy Yollin](http://www.r-programming.org/papers). It requires the `parallel` library and `doParallel` for Windows users and `doMC` for non-Windows users. 
+
+```{r}
+library(parallel)
+
+if( Sys.info()['sysname'] == "Windows") {
+    library(doParallel)
+    registerDoParallel(cores=detectCores())
+} else {
+    library(doMC)
+    registerDoMC(cores=detectCores())
+}
+```
+
+## Apply Paramset
+
+When we ran our original strategy we used `applyStrategy()`. When running distributions we use `apply.paramset()`. 
+
+For our current strategy we only need to pass in our portfolio and account objects.
+
+I've also used an if/else statement to avoid running this strategy repeatedly when making updates to the book which, again, is time-consuming. The results are saved to a RData file we'll analyze later.
+
+```{r parameter-optimization-apply-paramset, results = "hide"}
+cwd <- getwd()
+setwd("./_data/")
+results_file <- paste("results", strategy.st, "RData", sep = ".")
+if( file.exists(results_file) ) {
+    load(results_file)
+} else {
+    results <- apply.paramset(strategy.st,
+                              paramset.label = "SMA",
+                              portfolio.st = portfolio.st,
+                              account.st = account.st, 
+                              nsamples = .nsamples)
+    if(checkBlotterUpdate(portfolio.st, account.st, verbose = TRUE)) {
+        save(list = "results", file = results_file)
+        save.strategy(strategy.st)
+    }
+}
+setwd(cwd)
+```

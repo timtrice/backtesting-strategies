@@ -1,0 +1,170 @@
+```{r libraries}
+library(dplyr)
+library(ggplot2)
+library(lattice)
+library(tidyr)
+library(TTR)
+```
+
+# Close/SMA(20) Crossover
+
+$$ Signal = 
+    \begin{cases} 
+        Cl >= SMA(20), BTO \\ 
+        Cl < SMA(20), STC 
+    \end{cases}
+$$
+
+```{r 2-1-set-symbols}
+symbols <- basic_symbols()
+```
+
+```{r 2-1-settings}
+strategy_title <- "Close > SMA(20)"
+```
+
+```{r 2-1-initialize-portfolio}
+Cl.SMA20.Crossover <- "Cl.Sma20.Crossover"
+rm.strat(Cl.SMA20.Crossover)
+initPortf(Cl.SMA20.Crossover, symbols = basic_symbols(), initDate = pv$init_date)
+initAcct(Cl.SMA20.Crossover, portfolios = Cl.SMA20.Crossover, 
+         initDate = pv$init_date, initEq = pv$account_equity)
+initOrders(portfolio = Cl.SMA20.Crossover, initDate = pv$init_date)
+strategy(Cl.SMA20.Crossover, store = TRUE)
+strat <- getStrategy(Cl.SMA20.Crossover)
+```
+
+```{r 2-1-add-indicators}
+add.indicator(strategy = Cl.SMA20.Crossover, name = "SMA", 
+              arguments = list(x = quote(Cl(mktdata)), n = 20), label = "SMA20")
+```
+
+```{r 2-1-add-signals}
+add.signal(Cl.SMA20.Crossover, name="sigCrossover", 
+           arguments = list(columns = c("Close", "SMA20"), relationship = "gte"),
+           label="Cl.gte.SMA")
+add.signal(Cl.SMA20.Crossover, name = "sigCrossover",
+           arguments = list(columns = c("Close", "SMA20"), relationship = "lt"),
+           label = "Cl.lt.SMA")
+```
+
+```{r 2-1-add-rules}
+# BTO when Cl crosses above SMA(20)
+add.rule(Cl.SMA20.Crossover, name = 'ruleSignal',
+         arguments = list(sigcol = "Cl.gte.SMA", sigval = TRUE, orderqty = 100,
+                          ordertype = 'market', orderside = 'long'),
+         type = 'enter')
+
+# STC when Cl crosses under SMA(20)
+add.rule(Cl.SMA20.Crossover, name = 'ruleSignal',
+         arguments = list(sigcol = "Cl.lt.SMA", sigval = TRUE, orderqty = 'all',
+                          ordertype = 'market', orderside = 'long'),
+         type = 'exit')
+```
+
+```{r 2-1-apply-strategy, include = FALSE}
+applyStrategy(strategy = Cl.SMA20.Crossover, portfolios = Cl.SMA20.Crossover)
+```
+
+```{r 2-1-update-portfolio}
+updatePortf(Cl.SMA20.Crossover)
+updateAcct(Cl.SMA20.Crossover)
+updateEndEq(Cl.SMA20.Crossover)
+checkBlotterUpdate(Cl.SMA20.Crossover, Cl.SMA20.Crossover)
+```
+
+```{r 2-1-account-summary}
+a <- getAccount(Cl.SMA20.Crossover)
+p <- getPortfolio(Cl.SMA20.Crossover)
+```
+
+### Per Trade Stats
+
+```{r 2-1-trade-stats, include = TRUE}
+knitr::kable(t(tradeStats(Cl.SMA20.Crossover))[-c(1:2),], 
+             caption = "Trade Stats per Symbol")
+```
+
+### Maximum Adverse Excursion
+
+```{r 2-1-mae, include = TRUE, fig.caption = "Maximum Adverse Excursion by Symbol"}
+par(mfrow = c(2,2))
+for(symbol in symbols) {
+    chart.ME(Portfolio = Cl.SMA20.Crossover, Symbol = symbol, type = "MAE", 
+             scale = "percent")
+}
+par(mfrow = c(1,1))
+```
+
+### Maximum Favorable Excursion
+
+```{r 2-1-mfe, include = TRUE, fig.caption = "Maximum Favorable Excursion by Symbol"}
+par(mfrow = c(2,2))
+for(symbol in symbols) {
+    chart.ME(Portfolio = Cl.SMA20.Crossover, Symbol = symbol, type = "MFE", 
+             scale = "percent", legend.loc = "none")
+}
+par(mfrow = c(1,1))
+```
+
+```{r 2-1-individual-asset-returns}
+rets.multi <- PortfReturns(Cl.SMA20.Crossover)
+colnames(rets.multi) <- symbols
+rets.multi <- na.omit(cbind(rets.multi, Return.calculate(a$summary$End.Eq)))
+names(rets.multi)[length(names(rets.multi))] <- "TOTAL"
+rets.multi <- rets.multi[,c("TOTAL", symbols)]
+```
+
+### Cumulative Returns
+
+```{r 2-1-return-distribution-analysis, include = TRUE, fig.cap = "Return Distribution Analysis"}
+as.data.frame(rets.multi) %>% 
+    mutate(Date = index(rets.multi)) %>% 
+    gather(key, value, 1:ncol(rets.multi)) %>% 
+    filter(value != 0) %>% 
+    ggplot(aes(x = key, y = value, fill = key)) + 
+    geom_boxplot() + 
+    coord_flip() + 
+    theme(legend.title = element_blank()) + 
+    theme_bw() + 
+    scale_x_discrete(name = NULL) + 
+    scale_y_continuous(name = NULL) + 
+    scale_fill_discrete(name = "Symbol") + 
+    ggtitle("Return Distribution Analysis")
+```
+
+### Annualized Returns
+
+```{r 2-1-annualized-risk-return, include = TRUE}
+ar.tab <- table.AnnualizedReturns(rets.multi)
+max.risk <- max(ar.tab["Annualized Std Dev",])
+max.return <- max(ar.tab["Annualized Return",])
+knitr::kable(data.frame("Max Risk" = max.risk, 
+                        "Max Return" = max.return, 
+                        "Ratio" = max.risk/max.return), 
+             booktabs = TRUE, caption = "Max Risk, Max Reward, Ratio")
+
+knitr::kable(t(ar.tab), booktabs = TRUE, caption = "Annualized Risk and Return")
+```
+
+```{r 2-1-annualized-risk-return-chart, include = TRUE, fig.cap = "Annualized Risk and Return"}
+chart.RiskReturnScatter(rets.multi, main = "Performance", 
+                        colorset = rich10equal, xlim = c(0, max.risk * 1.1), 
+                        ylim = c(0, max.return))
+```
+
+```{r 2-1-consolidated-equity-curve, include = TRUE, fig.cap = "Consolidated Equity Curve"}
+equity <- a$summary$End.Eq
+plot(equity, main = "Consolidated Equity Curve")
+```
+
+```{r 2-1-asummary, include = TRUE, fig.cap = "Account Summary"}
+a <- getAccount(Cl.SMA20.Crossover)
+xyplot(a$summary, type = "h", col = 4)
+```
+
+```{r 2-1-performance-summary, include = TRUE}
+ret <- Return.calculate(equity, method = "log")
+charts.PerformanceSummary(ret, colorset = bluefocus, 
+                          main = strategy_title)
+```

@@ -1,0 +1,480 @@
+## Quantstrat II
+
+```{r 002a-comment-1, eval = FALSE}
+# http://www.r-programming.org/papers
+```
+
+```{r 002a-symbols}
+symbols <- basic_symbols()
+```
+
+```{r 002a-getSymbols}
+getSymbols(Symbols = symbols,
+           src = "yahoo",
+           index.class = "POSIXct",
+           from = start_date,
+           to = end_date,
+           adjust = adjustment)
+```
+
+```{r 002a-stock}
+stock(symbols, currency = "USD", multiplier = 1)
+```
+
+### multiAsset.bb1
+
+```{r 002a-strat-vars}
+SD <- 2
+N <- 20
+```
+
+```{r 002a-init}
+strategy.st <- "bbands"
+portfolio.st <- "multiAsset.bb1"
+account.st <- "multiAsset.bb1"
+```
+
+```{r 002a-rm-strat}
+rm.strat(portfolio.st)
+rm.strat(account.st)
+```
+
+```{r 002a-init-portf}
+initPortf(name = portfolio.st,
+          symbols = symbols,
+          initDate = init_date)
+```
+
+```{r 002a-init-acct}
+initAcct(name = account.st,
+         portfolios = portfolio.st,
+         initDate = init_date,
+         initEq = init_equity)
+```
+
+```{r 002a-init-orders}
+initOrders(portfolio = portfolio.st,
+           symbols = symbols,
+           initDate = init_date)
+```
+
+```{r 002a-strategy}
+strategy(strategy.st, store = TRUE)
+```
+
+```{r 002a-add-indicators}
+add.indicator(strategy.st, 
+              name = "BBands",
+              arguments = list(HLC = quote(HLC(mktdata)), 
+                               maType = "SMA"), 
+              label = "BBands")
+```
+
+```{r 002a-add-signals}
+add.signal(strategy.st, 
+           name = "sigCrossover", 
+           arguments = list(columns = c("Close", "up"), 
+                            relationship = "gt"), 
+           label = "Cl.gt.UpperBand")
+
+add.signal(strategy.st, 
+           name = "sigCrossover", 
+           arguments = list(columns = c("Close", "dn"), 
+                            relationship = "lt"), 
+           label = "Cl.lt.LowerBand")
+
+add.signal(strategy.st, 
+           name = "sigCrossover", 
+           arguments = list(columns = c("High", "Low", "mavg"), 
+                            relationship = "op"), 
+           label = "Cross.Mid")
+```
+
+```{r 002a-add-rules}
+add.rule(strategy.st, 
+         name = "ruleSignal", 
+         arguments = list(sigcol = "Cl.gt.UpperBand", 
+                          sigval = TRUE, 
+                          orderqty = -100, 
+                          ordertype = "market", 
+                          orderside = NULL), 
+         type = "enter")
+
+add.rule(strategy.st, 
+         name = "ruleSignal", 
+         arguments = list(sigcol = "Cl.lt.LowerBand", 
+                          sigval = TRUE, 
+                          orderqty = 100, 
+                          ordertype = "market", 
+                          orderside = NULL), 
+         type = "enter")
+
+add.rule(strategy.st, 
+         name = "ruleSignal", 
+         arguments = list(sigcol = "Cross.Mid", sigval = TRUE, 
+                          orderqty = "all", 
+                          ordertype = "market", 
+                          orderside = NULL), 
+         type = "exit")
+```
+
+```{r 002a-apply-strategy, results = "hide"}
+out <- applyStrategy(strategy.st,
+                    portfolios = portfolio.st,
+                    parameters = list(sd = SD, n = N))
+```
+
+```{r 002a-update}
+updatePortf(portfolio.st)
+updateAcct(account.st)
+updateEndEq(account.st)
+```
+
+```{r 002a-checkBlotterUpdate}
+checkBlotterUpdate(portfolio.st, account.st, verbose = TRUE)
+```
+
+```{r 002a-chart-posn}
+for(symbol in symbols) {
+    chart.Posn(portfolio.st, Symbol = symbol,
+               TA = "add_BBands(n = 20, sd = 2)")
+}
+```
+
+### multiAsset.bb2
+
+```{r 002b-init}
+strategy.st <- "bbands"
+portfolio.st <- "multiAsset.bb2"
+account.st <- "multiAsset.bb2"
+```
+
+```{r 002b-rm-strat}
+rm.strat(portfolio.st)
+```
+
+```{r 002b-init-portf}
+initPortf(name = portfolio.st, 
+          symbols, 
+          initDate = init_date)
+```
+
+```{r 002b-init-account}
+initAcct(name = account.st, 
+         portfolios = portfolio.st,
+         initDate = init_date, 
+         initEq = init_equity)
+```
+
+```{r 002b-init-orders}
+initOrders(portfolio = portfolio.st, 
+           initDate = init_date)
+```
+
+```{r 002b-strat-vars}
+SD <- 3
+```
+
+```{r 002b-apply-strategy}
+out <- applyStrategy(strategy.st,
+                     portfolios = portfolio.st,
+                     parameters = list(sd = SD, n = N))
+```
+
+```{r 002b-update}
+updatePortf(portfolio.st)
+updateAcct(account.st)
+updateEndEq(account.st)
+```
+
+```{r 002b-checkBlotterUpdate}
+checkBlotterUpdate(portfolio.st, account.st, verbose = TRUE)
+```
+
+```{r 002b-chart-posn}
+for(symbol in symbols) {
+    chart.Posn(portfolio.st, Symbol = symbol,
+               TA = "add_BBands(n = 20, sd = 2)")
+}
+```
+
+### Compare Strategies
+
+```{r}
+eq1 <- getAccount("multiAsset.bb1")$summary$End.Eq
+rt1 <- Return.calculate(eq1, "log")
+eq2 <- getAccount("multiAsset.bb2")$summary$End.Eq
+rt2 <- Return.calculate(eq2, "log")
+returns <- cbind(rt1, rt2)
+colnames(returns) <- c("SD = 2","SD = 3")
+chart.CumReturns(returns, colorset = c(2, 4), legend.loc = "topleft", 
+                 main = "BBand SD Parameter Comparison", ylab = "cum return", 
+                 xlab = "", minor.ticks = FALSE)
+```
+
+### Order Sizing
+
+#### osFixedDollar()
+
+This order sizing function adjusts the share quantity such that the transaction value is approximately equal to a pre-defined tradesize
+
+$$ \text{orderqty } = \frac{\text{tradeSize}}{\text{ClosePrice}} $$
+
+```{r}
+osFixedDollar <- function(timestamp, orderqty, portfolio, symbol, ruletype, ...) {
+    ClosePrice <- as.numeric(Cl(mktdata[timestamp,]))
+    orderqty <- round(tradeSize/ClosePrice, -2)
+    return(orderqty)
+}
+```
+
+### Fixed-Dollar Order Sizing
+
+#### Strategy Variables
+
+```{r 002c-strategy-vars}
+fastMA <- 12
+slowMA <- 26
+signalMA <- 9
+maType = "EMA"
+tradeSize <- init_equity/10
+```
+
+```{r 002c-init}
+strategy.st <- "macd"
+portfolio.st <- "multi.macd"
+account.st <- "multi.macd"
+```
+
+```{r 002c-rm-strat}
+rm.strat(portfolio.st)
+```
+
+```{r 002c-init-portf}
+initPortf(name = portfolio.st, 
+          symbols, 
+          initDate = init_date)
+```
+
+```{r 002c-init-account}
+initAcct(name = account.st, 
+         portfolios = portfolio.st,
+         initDate = init_date, 
+         initEq = init_equity)
+```
+
+```{r 002c-init-orders}
+initOrders(portfolio = portfolio.st, 
+           initDate = init_date)
+```
+
+```{r 002c-strategy}
+strategy(strategy.st, store = TRUE)
+```
+
+#### Add Indicators
+
+```{r 002c-add-indicators}
+add.indicator(strategy.st, 
+              name = "MACD", 
+              arguments = list(x = quote(Cl(mktdata))), 
+              label = "osc")
+```
+
+#### Add Signals
+
+```{r 002c-add-signals}
+add.signal(strategy.st, 
+           name = "sigThreshold", 
+           arguments = list(column = "signal.osc", 
+                            relationship = "gt", 
+                            threshold = 0, 
+                            cross = TRUE), 
+           label = "signal.gt.zero")
+
+add.signal(strategy.st, 
+           name = "sigThreshold", 
+           arguments = list(column = "signal.osc", 
+                            relationship = "lt", 
+                            threshold = 0, 
+                            cross = TRUE), 
+           label = "signal.lt.zero")
+```
+
+#### Add Rules
+
+```{r 002c-add-rules}
+add.rule(strategy.st, 
+         name = "ruleSignal", 
+         arguments = list(sigcol = "signal.gt.zero", 
+                          sigval = TRUE, 
+                          orderqty = 100, 
+                          ordertype = "market", 
+                          orderside = "long", 
+                          osFUN = "osFixedDollar"), 
+         type = "enter", 
+         label = "enter", 
+         storefun = FALSE)
+
+add.rule(strategy.st, 
+         name = "ruleSignal", 
+         arguments = list(sigcol = "signal.lt.zero", 
+                          sigval = TRUE, 
+                          orderqty = "all", 
+                          ordertype = "market", 
+                          orderside = "long"), 
+         type = "exit", 
+         label = "exit")
+```
+
+#### Apply Strategy
+
+```{r}
+out <- applyStrategy(strategy.st, 
+                     portfolios = portfolio.st, 
+                     parameters = list(nFast = fastMA, nSlow = slowMA, 
+                                       nSig = signalMA, maType = maType), 
+                     verbose = TRUE)
+```
+
+```{r 002c-update}
+updatePortf(portfolio.st)
+updateAcct(account.st)
+updateEndEq(account.st)
+```
+
+```{r 002c-checkBlotterUpdate}
+checkBlotterUpdate(portfolio.st, account.st, verbose = TRUE)
+```
+
+#### Chart Positions
+
+```{r 002c-chart-posn}
+for(symbol in symbols) {
+    chart.Posn(Portfolio = portfolio.st, 
+               Symbol = symbol)
+    add_MACD()
+    add_EMA(12, col = "red")
+    add_EMA(26, col = "blue")
+}
+```
+
+### Max Position Order Sizing
+
+```{r 002d-strategy-vars}
+strategy.st <- "bb.lim"
+SD <- 2
+N <- 20
+```
+
+```{r 002d-strategy}
+strategy(strategy.st, store = TRUE)
+```
+
+```{r 002d-add-indicators}
+add.indicator(strategy.st, 
+          name = "BBands", 
+          arguments = list(HLC = quote(HLC(mktdata)), 
+                           maType = "SMA"), 
+          label = "BBands")
+```
+
+```{r 002d-add-signals}
+add.signal(strategy.st, 
+           name = "sigCrossover", 
+           arguments = list(columns = c("Close", "up"), 
+                            relationship = "gt"), 
+           label = "Cl.gt.UpperBand")
+
+add.signal(strategy.st, 
+           name = "sigCrossover", 
+           arguments = list(columns = c("Close", "dn"), 
+                            relationship = "lt"), 
+           label = "Cl.lt.LowerBand")
+
+add.signal(strategy.st, 
+           name = "sigCrossover", 
+           arguments = list(columns = c("High", "Low", "mavg"), 
+                            relationship = "op"), 
+           label = "Cross.Mid")
+```
+
+```{r 002d-add-rules}
+add.rule(strategy.st, 
+         name = "ruleSignal", 
+         arguments = list(sigcol = "Cl.gt.UpperBand", 
+                          sigval = TRUE, 
+                          orderqty = -1000, 
+                          ordertype = "market", 
+               orderside = NULL, 
+               osFUN = "osMaxPos"), 
+         type = "enter")
+
+add.rule(strategy.st, name = "ruleSignal", 
+
+         arguments = list(sigcol = "Cl.lt.LowerBand", 
+                          sigval = TRUE, 
+                          orderqty =  1000, 
+                          ordertype = "market", 
+               orderside = NULL, 
+               osFUN = "osMaxPos"), 
+         type = "enter")
+
+add.rule(strategy.st, 
+         name = "ruleSignal", 
+         arguments = list(sigcol = "Cross.Mid", 
+                          sigval = TRUE, 
+                          orderqty =  "all", 
+                        ordertype = "market",
+                        orderside = NULL), 
+         type = "exit")
+```
+
+#### Position Limits
+
+```{r 002d-remove-portf}
+rm.strat("multi.bb.limit") # remove portfolio, account, orderbook if re-run
+```
+
+```{r 002d-init-objects}
+initPortf(name = "multi.bb.limit", 
+          symbols, 
+          initDate = init_date)
+initAcct(name = "multi.bb.limit", 
+         portfolios = "multi.bb.limit",
+initDate = init_date, 
+initEq = init_equity)
+initOrders(portfolio = "multi.bb.limit", 
+           initDate = init_date)
+```
+
+#### addPosLimit()
+
+```{r 002d-addPosLimit}
+for(symbol in symbols) {
+    addPosLimit("multi.bb.limit", 
+                symbol = symbol, 
+                timestamp = init_date, 
+                maxpos = 200, 
+                longlevels = 2 )
+}
+```
+
+#### Apply Strategy
+
+```{r 002d-apply-strategy}
+out <- applyStrategy(strategy.st, 
+                     portfolios = "multi.bb.limit", 
+                     parameters = list(sd = SD, n = N))
+```
+
+```{r 002d-update}
+updatePortf("multi.bb.limit")
+updateAcct("multi.bb.limit")
+updateEndEq("multi.bb.limit")
+```
+
+```{r 002d-checkBlotterUpdate}
+checkBlotterUpdate("multi.bb.limit", "multi.bb.limit")
+```
+

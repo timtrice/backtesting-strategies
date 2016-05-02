@@ -1,0 +1,328 @@
+# Basic Strategy {#basic-strategy}
+
+Let's start by using a basic strategy with SMA(20). Whenever `Cl >= SMA20` we'll issue an order to buy. When `Cl < SMA20` we'll exit the position. We will create this strategy on **SPY**.
+
+$$ Signal = 
+    \begin{cases} 
+        \text{Cl } >= \text{ SMA(20)}, \text{ BTO} \\ 
+        \text{Cl } < \text{ SMA(20)}, \text{ STC} 
+    \end{cases}
+$$
+
+```{r}
+symbols <- c("SPY")
+```
+
+There are several sources we can use depending on the instrument we want to access. For stocks, I'll use Yahoo!
+
+We also set our index.class parameter to a vector of `POSIXt` and `POSIXct`. Set the `from` parameter to the first date of data you want to retrieve and the `to` parameter to the last date of data. Lastly, we set `adjust` to `TRUE`. This adjusts the prices to accomodate stock splits, dividends, etc. 
+
+```{r 1-getsymbols}
+getSymbols(Symbols = symbols, 
+           src = "yahoo", 
+           index.class = "POSIXct",
+           from = start_date, 
+           to = end_date, 
+           adjust = adjustment)
+```
+
+```{r 1-stock}
+stock(symbols, 
+      currency = "USD", 
+      multiplier = 1)
+```
+
+## Initialize Account, Portfolio and Strategy
+
+Next, we name our strategy. This will come in handy later when saving them and accessing them later on. It will also keep our "accounts" seperated.
+
+```{r 2-create-objects}
+portfolio.st = "Basic.Portfolio"
+account.st = "Basic.Account"
+strategy.st = "Basic.Strategy"
+```
+
+We then run the `rm.strat` command to clean out any residuals from any previous runs. This is useless on a first-run but if we make a parameter change to the script this will ensure we're not holding onto old data.
+
+```{r 2-rm-strat}
+rm.strat(portfolio.st)
+rm.strat(account.st)
+```
+
+With `initPortf`, we create a new portfolio object that will hold all of our transactions, positions and more. 
+
+We pass three parameters here:
+
+* `name`: for simplicity we can use our `strat.name` variable to keep our data organized.
+
+* `symbols`: Pretty self-explantory
+
+* `initDate`: This is a new parameter we havent seen before but will use often on other function calls. This is simply an "initilization date".
+
+`initDate` should be the date prior to our first record. So, in this example we're accessing all of 2010 data for **SPY** starting at 2010-01-01. So, our `initDate` should be 2009-12-31. 
+
+Do not set an `initDate` beyond one day prior to your first observation. When running reports and charts you will get a lot of empty data/space. 
+
+```{r 2-init-portfolio}
+initPortf(name = portfolio.st,
+          symbols = symbols,
+          initDate = init_date)
+```
+
+Next we'll initialize our account with `initAcct`. This will hold multiple portfolios and our account details. Notice two of the parameters are the same as `initPortf` and two differences:
+
+* `portfolios`: The name of our current portfolio
+
+* `initEq`: This is the balance we want to start our portfolio against. 
+
+There is also a `currency` parameter we can pass but because we set that earlier, we do not need it here.
+
+```{r 2-init-account}
+initAcct(name = account.st,
+         portfolios = portfolio.st,
+         initDate = init_date,
+         initEq = init_equity)
+```
+
+`initOrders` will create an object to hold all of the orders for our portfolio. 
+
+```{r 2init-orders}
+initOrders(portfolio = portfolio.st,
+           symbols = symbols,
+           initDate = init_date)
+```
+
+`strategy` will construct our strategy object. `store` will hold the strategy settings for later use.
+
+```{r 2-build-strategy-object}
+strategy(strategy.st, store = TRUE)
+```
+
+## Indicators
+
+For our current strategy we only have one indicator to add: SMA(20). We'll add this indicator to our strategy with the `add.indicator` function.
+
+* `name` parameter is the name of a function; do not misinterpret it as a label (an additinoal parameter). This allows you to create your own functions as you get comfortable with backtesting. For now we'll use the `TTR:SMA` function.
+
+* `arguments` is a list of parameters passed to the function called in `name`. `SMA` requires only two parameters, `x`, our data object, and `n`, the number of periods to calculate.
+
+For this strategy we are basing our SMA(20) on closing prices. But the keen observer will recognize we're not passing an object as we normally would. For example, we might think to use:
+
+```{r 2-example1, eval = FALSE}
+arguments = list(SPY$Close, n = 20)
+```
+
+Instead we're passing a new object called `mktdata` wrapped inside a `Cl` function wrapped inside a `quote` function. This seems messy and may be a bit confusing. So let's start from the beginning.
+
+`mktdata` is a new object that will be created when our strategy runs. It will copy our symbol object then be manipulated as we will instruct. In this example, a new variable called *SMA20* (our `label` parameter) will be added. 
+
+The `Cl()` function simply references the `Close` variable of `mktdata`. This is a shortcut function created in the `quantmod` package. Note that it will only call the first variable that begins with "Cl".
+
+For example, if we have a xts object with the column names `c("Open", "High", "Low", "Close", "Close.gt.SMA20")` then `Cl()` will reference our `Close` variable. 
+
+If, however, we have ended up with a xts object where the column names are `c("Close.gt.SMA20", "Open", "High", "Low", "Close")` then `Cl()` will reference the `Close.gt.SMA20` variable. 
+
+As long as you don't manipulate the original symbol object this shouldn't be an issue. 
+
+We can use similar functions to represent the other variables in our object: `Op()` for Open, `Hi()` for High, `Lo()` for Low and `Ad()` for Adjusted. Run a help query on any of those calls to get more details.
+
+Lastly, we wrap our call in the `quote()` function which essentially wraps quotes around our arguments during the call. 
+
+```{r 2-comment1, include = FALSE}
+#' Would like to have more information here as to why all of that is required and what will happen if we did just attempt to reference, say by mktdata$Close
+```
+
+```{r 2-add-indicators}
+add.indicator(strategy = strategy.st,
+              name = "SMA",
+              arguments = list(x = quote(Cl(mktdata)),
+                               n = 20),
+              label = "SMA20")
+```
+
+An example of our `mktdata` object would look like this:
+
+```{r 2-example2}
+knitr::kable(data.frame("n" = c(1:6), 
+                        "Close" = c(99, 101.50, 102, 101, 103, 102), 
+                        "SMA20" = c(100, 101, 101.50, 100.50, 102.50, 102.50)), 
+             caption = "Sample mktdata with indicators")
+```
+
+## Signals
+
+Now that we've added our indicator it's time to instruct our strategy on when to buy and sell. We do this by setting up signals. 
+
+Signals are simply boolean values on if a given condition is met. In our current strategy, we want to buy when Close crosses over SMA(20) and sell when Close crosses under SMA(20). Each of these will be a signal. 
+
+We build our signals similar to how we built our indicators with some distinction. In `add.signal()`, one parameter we pass, `name` is similar to what we did in `add.indicator`; it is the name of a function call. We can use technically any function we want but the `quantstrat` library already has some essential ones built in for us.
+
+* `sigComparison`: compare one value to another. For example, if High is higher than Close or SMA(20) is greather than SMA(50).
+
+* `sigCrossover`: If one variable has crossed another. 
+
+* `sigFormula`: Use a formula to calculate the signal based on other observations. 
+
+* `sigPeak`: Use to find a local minima or maxima. 
+
+* `sigThreshold`: Use when an indicator or price object has crossed a certain value.
+
+* `sigTimestamp`: Signal based on date or time (Sell in May, go away?)
+
+All of the `name` parameters above should cover just about any strategy you want to run. For our current strategy, we'll use the `sigCrossover`.
+
+In our `arguments` list, we'll pass the two `columns` we are looking at for the crossover: `Close` and `SMA20` (the latter added in our `add.indicator` call above). We need to also pass the relationship we are looking for; in our example, `gte` and `lt`:
+
+* `gt`: greather than
+
+* `lt`: less than
+
+* `eq`: equal to
+
+* `gte`: greather than or equal to
+
+* `lte`: less than or equal to
+
+We also assign a label which can be any descriptive title we want to identify our variable. 
+
+Also note that you cannot have consistent TRUE values for either one of the variables. Therefore, you cannot have two consecutive signals. 
+
+```{r 2-add-signals}
+add.signal(strategy = strategy.st,
+           name="sigCrossover",
+           arguments = list(columns = c("Close", "SMA20"),
+                            relationship = "gte"),
+           label = "Cl.gte.SMA20")
+
+add.signal(strategy = strategy.st,
+           name="sigCrossover",
+           arguments = list(columns = c("Close", "SMA20"),
+                            relationship = "lt"),
+           label = "Cl.lt.SMA20")
+```
+
+An updated sample of our `mktdata` object would look like this:
+
+```{r 2-example3}
+knitr::kable(data.frame("n" = c(1:6), 
+                        "Close" = c(99, 101.50, 102, 101, 103, 102), 
+                        "SMA20" = c(100, 101, 101.50, 100.50, 102.50, 102.50), 
+                        "Cl.gte.SMA20" = c(0, 1, 0, 0, 0, 0), 
+                        "Cl.lt.SMA20" = c(0, 0, 0, 0, 0, 1)), 
+             caption = "Sample mktdata with indicators and signals")
+```
+
+In the example above, we see on row 2 that `Close` "crosses over" `SMA20`. This generates a TRUE value for `Cl.gte.SMA20`. Our next signal comes on row 6 when `Close` crosses back under `SMA20` (`Cl.lt.SMA20 == TRUE`).
+
+However, this does not create any trades. All we've done now is added indicators and signals. Now, we must tell our strategy what to do given the signals. We add rules.
+
+## Adding Rules
+
+Rules are where we will instruct R to make our transactions. When I first began working with these libraries this is where I often struggled. We'll keep it simple for the time being and go over a few basics.
+
+As with `add.indicator()` and `add.signal()`, `add.rule()` expects the first parameter to be the name of your strategy. As with before, `name` will be the function we want to call. For now we'll stick with `ruleSignal`. 
+
+You'll see below we have two rule sets; one for BTO orders and one for STC orders. We also use pretty much the same parameters in our `arguments` list:
+
+* `sigcol`: This is the signal column for which the rule references. 
+
+* `sigval`: The value of our `sigcol` when the rule should be applied.
+
+* `orderqty`: numeric or "all" for the number of shares to be executed.
+
+* `ordertype`: c("market", "limit", "stoplimit", "stoptrailing", "iceberg")
+
+* `orderside`: long or short
+
+Our last parameter, `type` is the type of order we are placing. There are several options we'll get into later but for now our rules will simply be enter or exit.
+
+```{r 2-add-rules}
+# BTO when Cl crosses above SMA(20)
+add.rule(strategy = strategy.st,
+         name = "ruleSignal",
+         arguments = list(sigcol = "Cl.gte.SMA20",
+                          sigval = TRUE,
+                          orderqty = 100,
+                          ordertype = "market",
+                          orderside = "long"),
+         type = "enter",
+         label = "BTO")
+
+# STC when Cl crosses under SMA(20)
+add.rule(strategy.st,
+         name = "ruleSignal",
+         arguments = list(sigcol = "Cl.lt.SMA20",
+                          sigval = TRUE,
+                          orderqty = "all",
+                          ordertype = "market",
+                          orderside = "long"),
+         type = "exit",
+         label = "STC")
+```
+
+Simply put, whenever our `Cl.gte.SMA` variable is TRUE we will submit a market order for 100 shares long. When `Cl.lt.SMA == TRUE` we will exit all long positions. 
+
+## Apply Strategy
+
+Up until this point if you've tried to execute certain blocks of code at a time you may have been disappointed. Nothing happens other than some little chunks of output. Unfortunately, we don't know how all of this works until we apply our strategy. 
+
+`applyStrategy()` will execute trades based on the conditions we've specified. Notice we have two parameters which we assign to our strategy name. When we execute this next block we either get trades or we get errors.
+
+```{r 2-apply-strategy, results = "hide"}
+# Results hidden to save space
+results <- applyStrategy(strategy = strategy.st,
+              portfolios = portfolio.st)
+```
+
+```{r 2-update}
+updatePortf(portfolio.st)
+updateAcct(account.st)
+updateEndEq(account.st)
+```
+
+```{r 2-checkBlotterUpdate}
+checkBlotterUpdate(portfolio.st, account.st, verbose = TRUE)
+```
+ 
+The format of our output should seem straightforward; we have Date followed by Symbol, Shares and Price. We've executed approximately ten trades (entry and exit). Our strategy actually ends with an open position (notice the buy on the last entry). 
+
+If we look at a sample of the `mktdata` object now available, we can see the indicators and signals we created earlier:
+
+```{r 2-example4}
+knitr::kable(mktdata[81:85,])
+```
+
+We can see in this subset we had four transactions; one on each side. Each position didn't last longer than a day but for our purposes now that's fine. Where `Cl.gte.SMA20 == 1` (TRUE) we would buy and where `Cl.lt.SMA20 == 1` (TRUE) we would sell per our rules.
+
+## Update Portfolio, Account
+
+To dig into the analysis of our strategy we must update our portfolio and account. We do this by calling `udpatePortf`, `updateAcct` and `updateEndEq` passing our `strat.name` variable as the lone parameter.
+
+```{r 2-update-portfolio}
+updatePortf(Portfolio = portfolio.st)
+updateAcct(name = account.st)
+updateEndEq(Account = account.st)
+```
+
+## Save Strategy
+
+For this book all strategy data is saved in the `_data` directory If you simply use  `save.strategy()` with the lone *strategy.name* parameter the RData file will be saved in the current working directory.
+
+```{r}
+cwd <- getwd()
+setwd("./_data/")
+save.strategy(strategy.st)
+setwd(cwd)
+```
+
+## Glimpse Our Returns
+
+To close this introduction we'll take a brief look at our transactions using the `chart.Posn` function from the `blotter` package. This chart will show us when we made trades, how many shares we purchased and what our profits and drawdown were. This is a great way to get a quick look at the profitability of a strategy.
+
+We pass `strat.name` to the `Portfolio` parameter and SPY to `Symbol`. In itself that is enough. However, because our trades are based on the SMA(20) indicator let's add that as well. We do this by passing the `add_sma` function from the `quantmod` package where `n` is our period (20) and `col` and `lwd` are the same as those we would pass to the base plot package. So we're asking for a line that is colored blue with a line-width of two By setting `on = 1` we are asking the indicator to be overlaid on the first panel (the price action panel).
+
+```{r 2-equity-curve}
+a <- getAccount(account.st)
+equity <- a$summary$End.Eq
+plot(equity, main = "Consolidated Equity Curve")
+```
