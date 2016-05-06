@@ -25,7 +25,7 @@
 
 <meta name="author" content="Tim Trice">
 
-<meta name="date" content="2016-05-02">
+<meta name="date" content="2016-05-06">
 
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
@@ -262,30 +262,19 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p>Let’s kick things off with a variation of the Luxor trading strategy. This strategy uses two SMA indicators: SMA(10) and SMA(30).</p>
 <p>If the SMA(10) indicator is greater than or equal to the SMA(30) indicator we will submit a stoplimit long order to open and close any short positions that may be open. If the SMA(10) is less than the SMA(30) we will submit a stoplimit short order to open and close any open long positions.</p>
 <div class="strategy">
-<p>
-If SMA(10) &gt;= SMA(30):
-</p>
-<pre><code>BTC short, BTO long</code></pre>
-<p>
-Else if SMA(10) &lt; SMA(30):
-</p>
-<pre><code>STC long, STO short</code></pre>
+<pre><code>If SMA(10) &gt;= SMA(30):
+
+    BTC short, BTO long
+
+Else if SMA(10) &lt; SMA(30): 
+
+    STC long, STO short</code></pre>
 </div>
 <p><strong>Note:</strong> Remember we have already set some variables earlier in the book. If you copy and paste the code below by itself you will get errors. There will be complete tutorials listed later in the book.</p>
 <div id="strategy-setup" class="section level2">
 <h2><span class="header-section-number">5.1</span> Strategy Setup</h2>
 <p>We load our symbols into <code>symbols</code>.</p>
-<pre><code>```r
-print(basic_symbols())
-```
-
-```
-## [1] &quot;IWM&quot; &quot;QQQ&quot; &quot;SPY&quot;
-```
-
-```r
-symbols &lt;- basic_symbols()
-```</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">symbols &lt;-<span class="st"> </span><span class="kw">basic_symbols</span>()</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">getSymbols</span>(<span class="dt">Symbols =</span> symbols, 
            <span class="dt">src =</span> <span class="st">&quot;yahoo&quot;</span>, 
            <span class="dt">index.class =</span> <span class="st">&quot;POSIXct&quot;</span>,
