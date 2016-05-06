@@ -5,13 +5,13 @@ Let's kick things off with a variation of the Luxor trading strategy. This strat
 If the SMA(10) indicator is greater than or equal to the SMA(30) indicator we will submit a stoplimit long order to open and close any short positions that may be open. If the SMA(10) is less than the SMA(30) we will submit a stoplimit short order to open and close any open long positions. 
 
 ```{block type = "strategy"}
-If SMA(10) >= SMA(30):
+    If SMA(10) >= SMA(30):
 
-    BTC short, BTO long
+        BTC short, BTO long
 
-Else if SMA(10) < SMA(30): 
+    Else if SMA(10) < SMA(30): 
 
-    STC long, STO short
+        STC long, STO short
 ```
 
 **Note:** Remember we have already set some variables earlier in the book. If you copy and paste the code below by itself you will get errors. There will be complete tutorials listed later in the book.
@@ -20,8 +20,7 @@ Else if SMA(10) < SMA(30):
 
 We load our symbols into `symbols`. 
 
-    ```{r basic-strategy-symbols}
-print(basic_symbols())
+```{r basic-strategy-symbols}
 symbols <- basic_symbols()
 ```
 
