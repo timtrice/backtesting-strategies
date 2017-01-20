@@ -115,7 +115,7 @@ DT::datatable(le,
 The **2008-02-25T00:00:00Z** bar shows `nFast` just fractions of a penny lower than `nSlow`. We get the cross on **2008-02-26T00:00:00Z** which gives a TRUE `long` signal. Our high on that bar is $132.61 which would be our stoplimit. On the **2008-02-27T00:00:00Z** bar we get a higher high which means our stoplimit order gets filled at $132.61. This is reflected by the faint green arrow at the top of the candles upper shadow. 
 
 ```{r data-quality-b-order-book}
-ob <- as.data.table(getOrderBook(portfolio.st)$Quantstrat$SPY)
+ob <- as.data.table(getOrderBook(portfolio.st)[[portfolio.st]]$SPY)
 DT::datatable(ob, 
               rownames = FALSE,
               filter = "top",
