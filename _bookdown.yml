@@ -1,20 +1,3 @@
-chapter_name: "Chapter "
-output_dir: "book"
 edit:
     link: https://github.com/timtrice/backtesting-strategies/edit/master/%s
     text: "Edit This Page"
-rmd_files: ["index.Rmd",
-    "introduction.Rmd",
-    "get-symbols.Rmd",
-    "basic-strategy.Rmd",
-    "data-quality.Rmd",
-    "parameter-optimization.Rmd",
-    "stop-loss.Rmd",
-    "stop-loss-optimization.Rmd",
-    "trailing-stop.Rmd",
-    "obtaining-resources.Rmd",
-    "analyzing-results.Rmd",
-    "walk-forward-analysis.Rmd",
-    "monte-carlo-analysis.Rmd",
-    "errors-warnings.Rmd",
-    "about.Rmd"]
