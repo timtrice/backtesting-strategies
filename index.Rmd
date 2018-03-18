@@ -17,6 +17,7 @@ output:
         css: toc.css
 documentclass: book
 description: "Backtesting strategies with R"
+site: bookdown::bookdown_site
 ---
 
 ```{r index-comments, eval = FALSE, echo = FALSE}
