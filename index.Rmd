@@ -34,10 +34,88 @@ site: bookdown::bookdown_site
 
 # Introduction
 
-# Chapter 2
+  * Packages required
+  
+    + blotter
+    
+    + PerformanceAnalytics
+    
+    + PortfolioAnalytics
+    
+    + quantmod
+    
+    + quantstrat
+    
+    + tidyquant
+    
+    + TTR
+  
+  * Purpose of each package and their dependencies.
 
-## Subchapter 2.1
+  * sessionInfo()
 
-# Chapter 3
+# Gathering Data
 
-## Subchapter 3.1
+  * Finding symbols
+  
+  * Getting OHLC data
+  
+    + Yahoo
+    
+    + Google
+    
+    + FRED
+
+## Analyzing Data
+
+  + tidyquant
+  
+  + Converting time series data
+  
+  + plotting time series data
+
+## Technical Indicators
+
+  * Moving Averages
+  
+  * Bollinger Bands
+  
+  * RSI
+
+## Trading Signals
+
+## Position Rules
+
+## Preliminary Analysis
+
+  * Applying a strategy
+  
+  * Plotting trades
+  
+  * trade statistics
+  
+  * account summary
+
+## Detailed Analysis
+
+## Overfitting
+
+## Walk Forward Analysis
+
+## Monte Carlo Analysis
+
+## Documenting Your Strategy
+
+## Paper Trading Your Strategy
+
+## Let's Do It Live!
+
+  + monitoring your trading activity
+
+Notes:
+
+  1. Maybe a demonstration using Think or Swim
+
+## About
+
+## Index
